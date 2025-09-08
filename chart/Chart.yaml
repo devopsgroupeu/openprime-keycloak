@@ -1,0 +1,22 @@
+apiVersion: v2
+name: openprime-keycloak
+description: Keycloak identity and access management for OpenPrime infrastructure platform
+type: application
+version: 0.2.0
+appVersion: "26.2.0"
+home: https://www.keycloak.org/
+sources:
+  - https://github.com/keycloak/keycloak
+keywords:
+  - keycloak
+  - identity
+  - authentication
+  - iam
+  - openprime
+  - infrastructure
+maintainers:
+  - name: DevOpsGroup
+    email: support@devopsgroup.eu
+annotations:
+  category: Authentication
+  licenses: Apache-2.0

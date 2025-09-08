@@ -1,0 +1,179 @@
+# Default values for openprime-keycloak.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: quay.io/keycloak/keycloak
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "26.2.0"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  fsGroup: 1000
+  runAsNonRoot: true
+  runAsUser: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: keycloak.openprime.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: keycloak-tls
+  #    hosts:
+  #      - keycloak.openprime.local
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 200m
+    memory: 512Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - openprime-keycloak
+        topologyKey: kubernetes.io/hostname
+
+# Application specific configuration
+app:
+  # Keycloak environment variables
+  env:
+    # Admin user configuration
+    KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
+    KC_BOOTSTRAP_ADMIN_PASSWORD: "admin123"
+    
+    # Database configuration
+    KC_DB: "postgres"
+    KC_DB_URL_HOST: "openprime-postgres"
+    KC_DB_URL_DATABASE: "keycloak"
+    KC_DB_USERNAME: "keycloak_user"
+    
+    # Hostname configuration
+    KC_HOSTNAME_URL: "http://localhost:8080"
+    KC_HOSTNAME_ADMIN_URL: "http://localhost:8080"
+    KC_HTTP_ENABLED: "true"
+    KC_HOSTNAME_STRICT: "false"
+    
+    # Development mode
+    KEYCLOAK_ADMIN: "admin"
+    KEYCLOAK_ADMIN_PASSWORD: "admin123"
+  
+  # Secrets (should be provided via external secret management)
+  secrets:
+    # Database password
+    KC_DB_PASSWORD: "keycloak123"
+
+# Health check configuration
+healthCheck:
+  enabled: true
+  livenessProbe:
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - timeout 10s bash -c '</dev/tcp/localhost/8080' || exit 1
+    initialDelaySeconds: 90
+    periodSeconds: 30
+    timeoutSeconds: 15
+    failureThreshold: 15
+  readinessProbe:
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - timeout 10s bash -c '</dev/tcp/localhost/8080' || exit 1
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+# Network policies
+networkPolicy:
+  enabled: false
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: openprime-app
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: openprime-app-backend
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: openprime-postgres
+
+# Realm configuration setup using keycloak-config-cli
+realmSetup:
+  enabled: true
+  image:
+    repository: adorsys/keycloak-config-cli
+    tag: "6.4.0-26"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi

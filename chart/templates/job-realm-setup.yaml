@@ -1,0 +1,51 @@
+{{- if .Values.realmSetup.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "openprime-keycloak.fullname" . }}-realm-setup
+  labels:
+    {{- include "openprime-keycloak.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "openprime-keycloak.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: realm-setup
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: keycloak-config-cli
+          image: "{{ .Values.realmSetup.image.repository }}:{{ .Values.realmSetup.image.tag }}"
+          imagePullPolicy: {{ .Values.realmSetup.image.pullPolicy }}
+          env:
+            - name: KEYCLOAK_URL
+              value: "http://{{ include "openprime-keycloak.fullname" . }}:{{ .Values.service.port }}"
+            - name: KEYCLOAK_USER
+              value: {{ .Values.app.env.KC_BOOTSTRAP_ADMIN_USERNAME | quote }}
+            - name: KEYCLOAK_PASSWORD
+              value: {{ .Values.app.env.KC_BOOTSTRAP_ADMIN_PASSWORD | quote }}
+            - name: KEYCLOAK_AVAILABILITYCHECK_ENABLED
+              value: "true"
+            - name: KEYCLOAK_AVAILABILITYCHECK_TIMEOUT
+              value: "120s"
+            - name: IMPORT_PATH
+              value: "/config"
+            - name: IMPORT_FORCE
+              value: "false"
+            - name: IMPORT_VAR_SUBSTITUTION_ENABLED
+              value: "false"
+          volumeMounts:
+            - name: realm-config
+              mountPath: /config
+              readOnly: true
+          resources:
+            {{- toYaml .Values.realmSetup.resources | nindent 12 }}
+      volumes:
+        - name: realm-config
+          configMap:
+            name: {{ include "openprime-keycloak.fullname" . }}-realm-config
+{{- end }}
