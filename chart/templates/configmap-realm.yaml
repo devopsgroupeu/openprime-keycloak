@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "openprime-keycloak.fullname" . }}-realm-config
+  labels:
+    {{- include "openprime-keycloak.labels" . | nindent 4 }}
+data:
+  openprime-realm.json: |
+    {
+      "realm": "openprime",
+      "enabled": true,
+      "displayName": "OpenPrime",
+      "sslRequired": "none",
+      "accessTokenLifespan": 3600,
+      "refreshTokenMaxReuse": 0,
+      "ssoSessionIdleTimeout": 1800,
+      "clients": [
+        {
+          "clientId": "openprime-app",
+          "enabled": true,
+          "publicClient": true,
+          "redirectUris": ["http://localhost/*"],
+          "webOrigins": ["http://localhost"],
+          "protocol": "openid-connect"
+        }
+      ],
+      "users": [
+        {
+          "username": "testuser",
+          "enabled": true,
+          "firstName": "testuser",
+          "lastName": "User",
+          "email": "testuser@example.com",
+          "emailVerified": true,
+          "credentials": [
+            {
+              "type": "password",
+              "value": "password123",
+              "temporary": false
+            }
+          ]
+        },
+        {
+          "username": "adminuser",
+          "enabled": true,
+          "firstName": "adminuser",
+          "lastName": "User",
+          "email": "adminuser@example.com",
+          "emailVerified": true,
+          "credentials": [
+            {
+              "type": "password",
+              "value": "admin123",
+              "temporary": false
+            }
+          ]
+        }
+      ]
+    }
