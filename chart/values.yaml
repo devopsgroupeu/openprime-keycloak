@@ -108,10 +108,9 @@ app:
     KC_DB_USERNAME: "keycloak_user"
     
     # Hostname configuration
-    KC_HOSTNAME_URL: "http://localhost:8080"
-    KC_HOSTNAME_ADMIN_URL: "http://localhost:8080"
     KC_HTTP_ENABLED: "true"
     KC_HOSTNAME_STRICT: "false"
+    KC_HTTP_RELATIVE_PATH: "/"
     
     # Development mode
     KEYCLOAK_ADMIN: "admin"
