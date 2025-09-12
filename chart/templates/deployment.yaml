@@ -36,12 +36,24 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.keycloak.command }}
+          command:
+            {{- toYaml .Values.keycloak.command | nindent 12 }}
+          {{- end }}
+          {{- if .Values.keycloak.args }}
+          args:
+            {{- toYaml .Values.keycloak.args | nindent 12 }}
+          {{- else }}
           args:
             - start-dev
+          {{- end }}
           env:
             {{- range $key, $value := .Values.app.env }}
             - name: {{ $key }}
               value: {{ $value | quote }}
+            {{- end }}
+            {{- if .Values.keycloak.extraEnvVars }}
+            {{- toYaml .Values.keycloak.extraEnvVars | nindent 12 }}
             {{- end }}
             {{- if .Values.app.secrets }}
             {{- range $key, $value := .Values.app.secrets }}
@@ -64,6 +76,14 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.keycloak.extraVolumeMounts }}
+          volumeMounts:
+            {{- toYaml .Values.keycloak.extraVolumeMounts | nindent 12 }}
+          {{- end }}
+      {{- if .Values.keycloak.extraVolumes }}
+      volumes:
+        {{- toYaml .Values.keycloak.extraVolumes | nindent 8 }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

@@ -19,8 +19,8 @@ data:
           "clientId": "openprime-app",
           "enabled": true,
           "publicClient": true,
-          "redirectUris": ["http://localhost/*"],
-          "webOrigins": ["http://localhost"],
+          "redirectUris": ["https://app.openprime.io/*"],
+          "webOrigins": ["https://app.openprime.io"],
           "protocol": "openid-connect"
         }
       ],
