@@ -14,6 +14,8 @@ data:
       "accessTokenLifespan": 3600,
       "refreshTokenMaxReuse": 0,
       "ssoSessionIdleTimeout": 1800,
+      "loginTheme": "openprime",
+      "accountTheme": "openprime",
       "clients": [
         {
           "clientId": "openprime-app",
