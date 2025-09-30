@@ -1,0 +1,29 @@
+{{- if .Values.theme.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "openprime-keycloak.fullname" . }}-theme
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "openprime-keycloak.labels" . | nindent 4 }}
+    app.kubernetes.io/component: theme
+  annotations:
+    # Force recreation when theme changes to ensure updates
+    checksum/theme: {{ include (print $.Template.BasePath "/configmap-theme.yaml") . | sha256sum }}
+data:
+  # Theme configuration
+  theme.properties: |
+{{ .Files.Get "theme/openprime/login/theme.properties" | indent 4 }}
+
+  # Custom messages
+  messages_en.properties: |
+{{ .Files.Get "theme/openprime/login/messages/messages_en.properties" | indent 4 }}
+
+  # Custom CSS styling
+  theme.css: |
+{{ .Files.Get "theme/openprime/login/resources/css/theme.css" | indent 4 }}
+
+  # Custom template
+  template.ftl: |
+{{ .Files.Get "theme/openprime/login/template.ftl" | indent 4 }}
+{{- end }}

@@ -176,3 +176,8 @@ realmSetup:
     requests:
       cpu: 100m
       memory: 128Mi
+
+# OpenPrime custom theme configuration
+theme:
+  enabled: true
+  name: openprime
