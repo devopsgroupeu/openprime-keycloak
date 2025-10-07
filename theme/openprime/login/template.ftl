@@ -94,7 +94,7 @@
             'use strict';
 
             // Focus first input for accessibility
-            const firstInput = document.querySelector('input:not([type="hidden"]):not([disabled])');
+            const firstInput = document.querySelector('input:not([type="hidden"]):not([disabled]):not([type="checkbox"])');
             if (firstInput) {
                 firstInput.focus();
             }
@@ -103,23 +103,88 @@
             const inputs = document.querySelectorAll('input[required]');
             inputs.forEach(input => {
                 input.addEventListener('blur', function() {
+                    if (this.type === 'checkbox') return;
                     if (this.value.trim() === '') {
-                        this.style.borderColor = 'var(--error)';
+                        this.style.borderColor = 'var(--op-error)';
                     } else {
-                        this.style.borderColor = 'var(--success)';
+                        this.style.borderColor = 'var(--op-success)';
                     }
                 });
 
                 input.addEventListener('input', function() {
-                    this.style.borderColor = 'var(--primary)';
+                    if (this.type !== 'checkbox') {
+                        this.style.borderColor = 'var(--op-primary)';
+                    }
                 });
             });
 
-            // Loading state for submit button
-            const form = document.querySelector('#kc-form-login');
+            // Add GDPR checkbox to registration form dynamically
+            const registerForm = document.querySelector('#kc-register-form, form[action*="registration"]');
+            if (registerForm) {
+                // Find the form buttons container
+                const formButtons = registerForm.querySelector('#kc-form-buttons, .form-group:has(input[type="submit"]), .form-group:has(button[type="submit"])');
+                
+                if (formButtons) {
+                    // Create GDPR form group to match other form fields structure
+                    const gdprFormGroup = document.createElement('div');
+                    gdprFormGroup.className = 'form-group';
+                    
+                    // Create wrapper div to match Bootstrap col structure
+                    const colWrapper = document.createElement('div');
+                    colWrapper.className = 'col-xs-12 col-sm-12 col-md-12 col-lg-12';
+                    
+                    // Create inner container with flex display
+                    const gdprContainer = document.createElement('div');
+                    gdprContainer.className = 'gdpr-checkbox-group';
+                    gdprContainer.style.display = 'flex';
+                    gdprContainer.style.alignItems = 'flex-start';
+                    gdprContainer.style.gap = '12px';
+                    
+                    // Create checkbox
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = 'gdpr-consent';
+                    checkbox.name = 'gdprConsent';
+                    checkbox.required = true;
+                    
+                    // Create label with styled spans instead of anchor tags
+                    const label = document.createElement('label');
+                    label.htmlFor = 'gdpr-consent';
+                    label.innerHTML = 'I agree to the <span class="gdpr-link" data-url="https://openprime.com/terms">Terms of Service</span> and <span class="gdpr-link" data-url="https://openprime.com/privacy">Privacy Policy</span> <span style="color: var(--op-error);">*</span>';
+                    
+                    // Prevent label click from triggering checkbox
+                    label.addEventListener('click', function(e) {
+                        if (e.target.classList.contains('gdpr-link')) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            window.open(e.target.getAttribute('data-url'), '_blank', 'noopener,noreferrer');
+                        }
+                    });
+                    
+                    // Build structure: formGroup > colWrapper > gdprContainer > (checkbox + label)
+                    gdprContainer.appendChild(checkbox);
+                    gdprContainer.appendChild(label);
+                    colWrapper.appendChild(gdprContainer);
+                    gdprFormGroup.appendChild(colWrapper);
+                    
+                    // Insert before the form buttons container
+                    formButtons.parentNode.insertBefore(gdprFormGroup, formButtons);
+                }
+            }
+
+            // Loading state for submit button with GDPR validation
+            const form = document.querySelector('#kc-form-login, #kc-register-form, form[action*="registration"]');
             const submitBtn = document.querySelector('input[type="submit"], button[type="submit"]');
             if (submitBtn && form) {
-                form.addEventListener('submit', function() {
+                form.addEventListener('submit', function(e) {
+                    // Check GDPR consent on registration form
+                    const gdprCheckbox = document.querySelector('#gdpr-consent');
+                    if (gdprCheckbox && !gdprCheckbox.checked) {
+                        e.preventDefault();
+                        alert('Please accept the Terms of Service and Privacy Policy to continue.');
+                        return false;
+                    }
+                    
                     submitBtn.disabled = true;
                     submitBtn.style.opacity = '0.6';
                 });
