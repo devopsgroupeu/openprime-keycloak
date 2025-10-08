@@ -579,73 +579,7 @@ body.login-pf #kc-form-options a {
   margin-bottom: 4px !important;
 }
 
-/* GDPR Checkbox styling - dynamically added by JavaScript */
-body.login-pf .gdpr-checkbox-group {
-  display: flex !important;
-  align-items: flex-start !important;
-  justify-content: flex-start !important;
-  gap: 12px !important;
-  margin: 0 0 0 -10px !important;  /* Slight negative margin to align with labels */
-  padding: 0 !important;
-  flex-direction: row !important;
-  width: 100% !important;
-  text-align: left !important;
-}
-
-body.login-pf .gdpr-checkbox-group input[type="checkbox"] {
-  width: 20px !important;
-  height: 20px !important;
-  min-width: 20px !important;
-  min-height: 20px !important;
-  margin: 2px 0 0 0 !important;
-  flex-shrink: 0 !important;
-  cursor: pointer !important;
-  border: 2px solid #cbd5e1 !important;
-  border-radius: 6px !important;
-  background: white !important;
-  appearance: none !important;
-  -webkit-appearance: none !important;
-  -moz-appearance: none !important;
-  padding: 0 !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
-  transition: all 0.2s ease !important;
-  order: 1 !important;
-  position: relative !important;
-}
-
-body.login-pf .gdpr-checkbox-group input[type="checkbox"]:hover {
-  border-color: var(--op-primary) !important;
-}
-
-body.login-pf .gdpr-checkbox-group input[type="checkbox"]:checked {
-  background-color: var(--op-primary) !important;
-  border-color: var(--op-primary) !important;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='white' d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z'/%3E%3C/svg%3E") !important;
-  background-size: 14px !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
-}
-
-body.login-pf .gdpr-checkbox-group input[type="checkbox"]:focus {
-  outline: none !important;
-  border-color: var(--op-primary) !important;
-  box-shadow: 0 0 0 3px rgba(53, 176, 160, 0.1) !important;
-}
-
-body.login-pf .gdpr-checkbox-group label {
-  cursor: pointer !important;
-  font-size: 14px !important;
-  line-height: 1.6 !important;
-  flex: 1 !important;
-  color: var(--op-gray-700) !important;
-  margin: 2px 0 0 0 !important;
-  padding: 0 !important;
-  font-weight: 400 !important;
-  text-align: left !important;
-  order: 2 !important;
-}
-
-/* GDPR Checkbox styling */
+/* Checkbox styling */
 body.login-pf .pf-c-check,
 body.login-pf .checkbox,
 body.login-pf .form-group.checkbox {
@@ -655,49 +589,7 @@ body.login-pf .form-group.checkbox {
   gap: 12px !important;
 }
 
-/* Handle GDPR form group - make it flex */
-body.login-pf .pf-c-form__group:has([name*="gdprConsent"]),
-body.login-pf .pf-c-form__group:has([name*="termsAccepted"]),
-body.login-pf .form-group:has([name*="gdprConsent"]),
-body.login-pf .form-group:has([name*="termsAccepted"]) {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: flex-start !important;
-  gap: 12px !important;
-  margin: 24px 0 !important;
-}
-
-/* GDPR Label styling */
-body.login-pf label[for*="gdprConsent"],
-body.login-pf label[for*="termsAccepted"] {
-  display: inline !important;
-  font-size: 14px !important;
-  color: var(--op-gray-700) !important;
-  line-height: 1.6 !important;
-  cursor: pointer !important;
-  margin: 2px 0 0 0 !important;
-  padding: 0 !important;
-  font-weight: 400 !important;
-  order: 2 !important;
-  flex: 1 !important;
-}
-
-/* Hide standalone asterisk for GDPR */
-body.login-pf label[for*="gdprConsent"] ~ .required,
-body.login-pf label[for*="termsAccepted"] ~ .required {
-  display: none !important;
-}
-
-/* Show asterisk inline with label text */
-body.login-pf label[for*="gdprConsent"] .required,
-body.login-pf label[for*="termsAccepted"] .required {
-  display: inline !important;
-  margin-left: 0 !important;
-}
-
-body.login-pf input[type="checkbox"],
-body.login-pf input[type="checkbox"][name*="gdprConsent"],
-body.login-pf input[type="checkbox"][name*="termsAccepted"] {
+body.login-pf input[type="checkbox"] {
   width: 20px !important;
   height: 20px !important;
   min-width: 20px !important;
@@ -714,9 +606,7 @@ body.login-pf input[type="checkbox"][name*="termsAccepted"] {
   appearance: none !important;
   -webkit-appearance: none !important;
   -moz-appearance: none !important;
-  order: 1 !important;
   position: relative !important;
-  z-index: 1 !important;
 }
 
 body.login-pf input[type="checkbox"]:hover {
@@ -741,7 +631,6 @@ body.login-pf input[type="checkbox"]:focus {
 body.login-pf .pf-c-check__label,
 body.login-pf .checkbox label,
 body.login-pf label[for*="terms"],
-body.login-pf label[for*="gdpr"],
 body.login-pf label[for*="consent"] {
   font-size: 14px !important;
   color: var(--op-gray-700) !important;
@@ -755,17 +644,57 @@ body.login-pf label[for*="consent"] {
 }
 
 body.login-pf .pf-c-check__label a,
-body.login-pf .checkbox label a,
-body.login-pf label[for*="gdpr"] a {
+body.login-pf .checkbox label a {
   font-weight: 600 !important;
   color: var(--op-primary) !important;
   text-decoration: underline !important;
 }
 
 body.login-pf .pf-c-check__label a:hover,
-body.login-pf .checkbox label a:hover,
-body.login-pf label[for*="gdpr"] a:hover {
+body.login-pf .checkbox label a:hover {
   color: var(--op-primary-dark) !important;
+}
+
+/* Terms and Conditions page styling */
+body.login-pf #kc-terms-text h2 {
+  font-size: 25px !important;
+  font-weight: 600 !important;
+  color: var(--op-primary-dark) !important;
+  padding-bottom: 15px !important;
+  margin-bottom: 32px !important;
+}
+
+body.login-pf #kc-terms-text > div {
+  max-height: 400px !important;
+  overflow-y: auto !important;
+  padding-right: 12px !important;
+  color: var(--op-gray-700) !important;
+  line-height: 1.6 !important;
+}
+
+body.login-pf #kc-terms-text h3 {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: var(--op-gray-800) !important;
+  margin-top: 20px !important;
+  margin-bottom: 12px !important;
+}
+
+body.login-pf #kc-terms-text h3:first-of-type {
+  margin-top: 0 !important;
+}
+
+body.login-pf #kc-terms-text p {
+  margin-bottom: 16px !important;
+}
+
+body.login-pf #kc-terms-text ul {
+  margin-left: 20px !important;
+  margin-bottom: 16px !important;
+}
+
+body.login-pf #kc-terms-text li {
+  margin-bottom: 6px !important;
 }
 
 /* Clean overrides */
@@ -776,24 +705,6 @@ body.login-pf .card-pf-title {
   box-shadow: none !important;
   padding: 0 !important;
   margin: 0 !important;
-}
-
-/* ============================================
-   GDPR LINK FIX - HIGHEST SPECIFICITY
-   ============================================ */
-
-/* Style the GDPR link spans (not anchor tags) */
-body.login-pf .gdpr-checkbox-group .gdpr-link {
-  color: var(--op-primary) !important;
-  text-decoration: underline !important;
-  cursor: pointer !important;
-  font-weight: 600 !important;
-  transition: color 0.2s ease !important;
-}
-
-body.login-pf .gdpr-checkbox-group .gdpr-link:hover {
-  color: var(--op-primary-dark) !important;
-  text-decoration: underline !important;
 }
 
 /* Mobile responsive */
@@ -833,5 +744,13 @@ body.login-pf .gdpr-checkbox-group .gdpr-link:hover {
   body.login-pf input[type="submit"] {
     min-height: 52px !important;
     padding: 16px 24px !important;
+  }
+  
+  body.login-pf #kc-terms-text h2 {
+    font-size: 20px !important;
+  }
+  
+  body.login-pf #kc-terms-text > div {
+    max-height: 300px !important;
   }
 }
