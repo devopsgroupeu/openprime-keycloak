@@ -8,7 +8,7 @@ image:
   repository: quay.io/keycloak/keycloak
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "26.2.0"
+  tag: "26.4.0"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -34,7 +34,7 @@ securityContext:
   allowPrivilegeEscalation: false
   capabilities:
     drop:
-    - ALL
+      - ALL
   readOnlyRootFilesystem: false
   runAsNonRoot: true
   runAsUser: 1000
@@ -83,15 +83,27 @@ tolerations: []
 affinity:
   podAntiAffinity:
     preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 100
-      podAffinityTerm:
-        labelSelector:
-          matchExpressions:
-          - key: app.kubernetes.io/name
-            operator: In
-            values:
-            - openprime-keycloak
-        topologyKey: kubernetes.io/hostname
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - openprime-keycloak
+          topologyKey: kubernetes.io/hostname
+
+# Keycloak specific configuration
+keycloak:
+  # Command to run (optional, leave empty to use default entrypoint)
+  command: []
+  # Arguments for Keycloak
+  args:
+    - start
+  # Extra environment variables
+  extraEnvVars: []
+  # Extra volume mounts
+  extraVolumeMounts: []
 
 # Application specific configuration
 app:
@@ -100,22 +112,22 @@ app:
     # Admin user configuration
     KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
     KC_BOOTSTRAP_ADMIN_PASSWORD: "admin123"
-    
+
     # Database configuration
     KC_DB: "postgres"
     KC_DB_URL_HOST: "openprime-postgres"
     KC_DB_URL_DATABASE: "keycloak"
     KC_DB_USERNAME: "keycloak_user"
-    
+
     # Hostname configuration
     KC_HTTP_ENABLED: "true"
     KC_HOSTNAME_STRICT: "false"
     KC_HTTP_RELATIVE_PATH: "/"
-    
+
     # Development mode
     KEYCLOAK_ADMIN: "admin"
     KEYCLOAK_ADMIN_PASSWORD: "admin123"
-  
+
   # Secrets (should be provided via external secret management)
   secrets:
     # Database password

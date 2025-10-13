@@ -13,10 +13,13 @@ spec:
       {{- include "openprime-keycloak.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
+        {{- if .Values.theme.enabled }}
+        checksum/theme: {{ include "openprime-keycloak.fullname" . }}-theme-{{ .Release.Revision }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       labels:
         {{- include "openprime-keycloak.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
