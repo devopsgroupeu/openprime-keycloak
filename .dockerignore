@@ -1,0 +1,25 @@
+# Helm chart files
+chart/
+
+# Git files
+.git/
+.gitignore
+
+# Documentation
+*.md
+README.md
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.bak
+*~
