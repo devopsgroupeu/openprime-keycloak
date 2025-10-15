@@ -93,8 +93,66 @@
         (function() {
             'use strict';
 
+            // Replace "Terms and conditions to be defined" with actual terms
+            const termsTextElement = document.querySelector('#kc-terms-text');
+            if (termsTextElement) {
+                const termsContent = `
+                    <h2>Terms and Conditions</h2>
+                    
+                    <div>
+                        <h3>1. Acceptance of Terms</h3>
+                        <p>By accessing and using the OpenPrime platform, you agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our services.</p>
+                        
+                        <h3>2. User Account and Registration</h3>
+                        <p>You must provide accurate, current, and complete information during the registration process. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.</p>
+                        
+                        <h3>3. Use of Services</h3>
+                        <p>You agree to use our services only for lawful purposes and in accordance with these Terms. You must not:</p>
+                        <ul>
+                            <li>Use the services in any way that violates any applicable laws or regulations</li>
+                            <li>Attempt to gain unauthorized access to any portion of the services</li>
+                            <li>Interfere with or disrupt the services or servers</li>
+                            <li>Transmit any viruses, malware, or other malicious code</li>
+                        </ul>
+                        
+                        <h3>4. Privacy and Data Protection</h3>
+                        <p>Your privacy is important to us. Our Privacy Policy explains how we collect, use, and protect your personal information. By using our services, you consent to our data practices as described in the Privacy Policy.</p>
+                        
+                        <h3>5. Intellectual Property</h3>
+                        <p>All content, features, and functionality of the OpenPrime platform are owned by OpenPrime and are protected by international copyright, trademark, and other intellectual property laws.</p>
+                        
+                        <h3>6. Limitation of Liability</h3>
+                        <p>OpenPrime shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use or inability to use the services.</p>
+                        
+                        <h3>7. Changes to Terms</h3>
+                        <p>We reserve the right to modify these Terms at any time. We will notify users of any material changes. Your continued use of the services after such changes constitutes acceptance of the modified Terms.</p>
+                    </div>
+                `;
+                
+                termsTextElement.innerHTML = termsContent;
+            }
+
+            // Style standalone asterisks to be red
+            const textNodes = document.evaluate(
+                "//text()[normalize-space(.)='*' and not(parent::span[@class='required'])]",
+                document,
+                null,
+                XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+                null
+            );
+
+            for (let i = 0; i < textNodes.snapshotLength; i++) {
+                const node = textNodes.snapshotItem(i);
+                if (node.nodeValue.trim() === '*') {
+                    const span = document.createElement('span');
+                    span.className = 'required';
+                    span.textContent = '*';
+                    node.parentNode.replaceChild(span, node);
+                }
+            }
+
             // Focus first input for accessibility
-            const firstInput = document.querySelector('input:not([type="hidden"]):not([disabled])');
+            const firstInput = document.querySelector('input:not([type="hidden"]):not([disabled]):not([type="checkbox"])');
             if (firstInput) {
                 firstInput.focus();
             }
@@ -103,23 +161,26 @@
             const inputs = document.querySelectorAll('input[required]');
             inputs.forEach(input => {
                 input.addEventListener('blur', function() {
+                    if (this.type === 'checkbox') return;
                     if (this.value.trim() === '') {
-                        this.style.borderColor = 'var(--error)';
+                        this.style.borderColor = 'var(--op-error)';
                     } else {
-                        this.style.borderColor = 'var(--success)';
+                        this.style.borderColor = 'var(--op-success)';
                     }
                 });
 
                 input.addEventListener('input', function() {
-                    this.style.borderColor = 'var(--primary)';
+                    if (this.type !== 'checkbox') {
+                        this.style.borderColor = 'var(--op-primary)';
+                    }
                 });
             });
 
             // Loading state for submit button
-            const form = document.querySelector('#kc-form-login');
+            const form = document.querySelector('#kc-form-login, #kc-register-form, form[action*="registration"]');
             const submitBtn = document.querySelector('input[type="submit"], button[type="submit"]');
             if (submitBtn && form) {
-                form.addEventListener('submit', function() {
+                form.addEventListener('submit', function(e) {
                     submitBtn.disabled = true;
                     submitBtn.style.opacity = '0.6';
                 });
