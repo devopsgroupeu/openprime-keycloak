@@ -80,33 +80,9 @@ spec:
             {{- if .Values.keycloak.extraVolumeMounts }}
             {{- toYaml .Values.keycloak.extraVolumeMounts | nindent 12 }}
             {{- end }}
-            {{- if .Values.theme.enabled }}
-            # OpenPrime theme file mounts - optimized for performance
-            - name: theme-config
-              mountPath: /opt/keycloak/themes/openprime/login/theme.properties
-              subPath: theme.properties
-              readOnly: true
-            - name: theme-config
-              mountPath: /opt/keycloak/themes/openprime/login/messages/messages_en.properties
-              subPath: messages_en.properties
-              readOnly: true
-            - name: theme-config
-              mountPath: /opt/keycloak/themes/openprime/login/resources/css/theme.css
-              subPath: theme.css
-              readOnly: true
-            - name: theme-config
-              mountPath: /opt/keycloak/themes/openprime/login/template.ftl
-              subPath: template.ftl
-              readOnly: true
-            {{- end }}
       volumes:
         {{- if .Values.keycloak.extraVolumes }}
         {{- toYaml .Values.keycloak.extraVolumes | nindent 8 }}
-        {{- end }}
-        {{- if .Values.theme.enabled }}
-        - name: theme-config
-          configMap:
-            name: {{ include "openprime-keycloak.fullname" . }}-theme
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

@@ -7,10 +7,10 @@ replicaCount: 1
 image:
   # Use custom image with OpenPrime theme baked in
   # To build: docker build -t your-registry/openprime-keycloak:26.2.0 openprime-keycloak/
-  repository: quay.io/keycloak/keycloak
+  repository: ghcr.io/devopsgroupeu/openprime-keycloak
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "26.2.0"
+  tag: latest
   # For custom image with theme:
   # repository: your-registry/openprime-keycloak
   # tag: "26.2.0"
@@ -98,6 +98,19 @@ affinity:
             - openprime-keycloak
         topologyKey: kubernetes.io/hostname
 
+# Keycloak specific configuration
+keycloak:
+  # Custom command (optional)
+  command: []
+  # Custom args (optional, defaults to start-dev if not specified)
+  args: []
+  # Extra environment variables
+  extraEnvVars: []
+  # Extra volume mounts
+  extraVolumeMounts: []
+  # Extra volumes
+  extraVolumes: []
+
 # Application specific configuration
 app:
   # Keycloak environment variables
@@ -105,23 +118,23 @@ app:
     # Admin user configuration
     KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
     KC_BOOTSTRAP_ADMIN_PASSWORD: "admin123"
-    
+
     # Database configuration
     KC_DB: "postgres"
     KC_DB_URL_HOST: "openprime-postgres"
     KC_DB_URL_DATABASE: "keycloak"
     KC_DB_USERNAME: "keycloak_user"
-    
+
     # Hostname configuration
     KC_HOSTNAME: keycloak.oepnprime.local
     KC_HTTP_ENABLED: "true"
     KC_HOSTNAME_STRICT: "false"
     KC_HTTP_RELATIVE_PATH: "/"
-    
+
     # Development mode
     KEYCLOAK_ADMIN: "admin"
     KEYCLOAK_ADMIN_PASSWORD: "admin123"
-  
+
   # Secrets (should be provided via external secret management)
   secrets:
     # Database password
@@ -182,11 +195,6 @@ realmSetup:
     requests:
       cpu: 100m
       memory: 128Mi
-
-# OpenPrime custom theme configuration
-theme:
-  enabled: true
-  name: openprime
 
 openprime:
   frontendUrl: app.openprime.local
