@@ -136,6 +136,13 @@ app:
     KEYCLOAK_ADMIN_PASSWORD: "admin123"
 
   # Secrets (should be provided via external secret management)
+  # Use existing secret instead of creating one from values
+  existingSecret: ""
+  # Keys to load from existing secret (only used when existingSecret is set)
+  existingSecretKeys:
+    - KC_DB_PASSWORD
+    - KC_BOOTSTRAP_ADMIN_PASSWORD
+  # Secrets to create (only used when existingSecret is not set)
   secrets:
     # Database password
     KC_DB_PASSWORD: "keycloak123"
