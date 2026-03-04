@@ -27,8 +27,10 @@ serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
+  automount: true
 
 podAnnotations: {}
+podLabels: {}
 
 podSecurityContext:
   fsGroup: 1000
@@ -39,7 +41,7 @@ securityContext:
   allowPrivilegeEscalation: false
   capabilities:
     drop:
-    - ALL
+      - ALL
   readOnlyRootFilesystem: false
   runAsNonRoot: true
   runAsUser: 1000
@@ -88,15 +90,15 @@ tolerations: []
 affinity:
   podAntiAffinity:
     preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 100
-      podAffinityTerm:
-        labelSelector:
-          matchExpressions:
-          - key: app.kubernetes.io/name
-            operator: In
-            values:
-            - openprime-keycloak
-        topologyKey: kubernetes.io/hostname
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - openprime-keycloak
+          topologyKey: kubernetes.io/hostname
 
 # Keycloak specific configuration
 keycloak:
@@ -126,14 +128,10 @@ app:
     KC_DB_USERNAME: "keycloak_user"
 
     # Hostname configuration
-    KC_HOSTNAME: keycloak.oepnprime.local
+    KC_HOSTNAME: keycloak.openprime.local
     KC_HTTP_ENABLED: "true"
     KC_HOSTNAME_STRICT: "false"
     KC_HTTP_RELATIVE_PATH: "/"
-
-    # Development mode
-    KEYCLOAK_ADMIN: "admin"
-    KEYCLOAK_ADMIN_PASSWORD: "admin123"
 
   # Secrets (should be provided via external secret management)
   # Use existing secret instead of creating one from values
@@ -205,3 +203,7 @@ realmSetup:
 
 openprime:
   frontendUrl: app.openprime.local
+  domain: openprime.io
+
+argocd:
+  clientSecret: "argocd-keycloak-client-secret"

@@ -21,9 +21,52 @@ data:
           "clientId": "openprime-app",
           "enabled": true,
           "publicClient": true,
+          "standardFlowEnabled": true,
+          "implicitFlowEnabled": false,
+          "directAccessGrantsEnabled": false,
           "redirectUris": ["https://{{ .Values.openprime.frontendUrl }}/*"],
           "webOrigins": ["https://{{ .Values.openprime.frontendUrl }}"],
           "protocol": "openid-connect"
+        },
+        {
+          "clientId": "argocd",
+          "enabled": true,
+          "publicClient": false,
+          "standardFlowEnabled": true,
+          "implicitFlowEnabled": false,
+          "directAccessGrantsEnabled": false,
+          "secret": "{{ .Values.argocd.clientSecret }}",
+          "redirectUris": [
+            "https://argocd.{{ .Values.openprime.domain }}/dex/callback"
+          ],
+          "webOrigins": ["https://argocd.{{ .Values.openprime.domain }}"],
+          "attributes": {
+            "pkce.code.challenge.method": "S256"
+          },
+          "protocol": "openid-connect",
+          "protocolMappers": [
+            {
+              "name": "groups",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-group-membership-mapper",
+              "consentRequired": false,
+              "config": {
+                "full.path": "false",
+                "id.token.claim": "true",
+                "access.token.claim": "true",
+                "claim.name": "groups",
+                "userinfo.token.claim": "true"
+              }
+            }
+          ]
+        }
+      ],
+      "groups": [
+        {
+          "name": "openprime-admins"
+        },
+        {
+          "name": "openprime-users"
         }
       ],
       "users": [
@@ -40,7 +83,8 @@ data:
               "value": "password123",
               "temporary": false
             }
-          ]
+          ],
+          "groups": ["openprime-users"]
         },
         {
           "username": "adminuser",
@@ -55,7 +99,8 @@ data:
               "value": "admin123",
               "temporary": false
             }
-          ]
+          ],
+          "groups": ["openprime-admins"]
         }
       ]
     }
