@@ -35,7 +35,7 @@ spec:
             - name: IMPORT_PATH
               value: "/config"
             - name: IMPORT_FORCE
-              value: "false"
+              value: "true"
             - name: IMPORT_VAR_SUBSTITUTION_ENABLED
               value: "false"
           volumeMounts:
