@@ -16,6 +16,31 @@ data:
       "ssoSessionIdleTimeout": 1800,
       "loginTheme": "openprime",
       "accountTheme": "openprime",
+      "clientScopes": [
+        {
+          "name": "groups",
+          "protocol": "openid-connect",
+          "attributes": {
+            "include.in.token.scope": "true",
+            "display.on.consent.screen": "true"
+          },
+          "protocolMappers": [
+            {
+              "name": "groups",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-group-membership-mapper",
+              "consentRequired": false,
+              "config": {
+                "full.path": "false",
+                "id.token.claim": "true",
+                "access.token.claim": "true",
+                "claim.name": "groups",
+                "userinfo.token.claim": "true"
+              }
+            }
+          ]
+        }
+      ],
       "clients": [
         {
           "clientId": "openprime-app",
@@ -44,21 +69,7 @@ data:
             "pkce.code.challenge.method": "S256"
           },
           "protocol": "openid-connect",
-          "protocolMappers": [
-            {
-              "name": "groups",
-              "protocol": "openid-connect",
-              "protocolMapper": "oidc-group-membership-mapper",
-              "consentRequired": false,
-              "config": {
-                "full.path": "false",
-                "id.token.claim": "true",
-                "access.token.claim": "true",
-                "claim.name": "groups",
-                "userinfo.token.claim": "true"
-              }
-            }
-          ]
+          "optionalClientScopes": ["groups"]
         }
       ],
       "groups": [
