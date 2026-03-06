@@ -119,7 +119,6 @@ app:
   env:
     # Admin user configuration
     KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
-    KC_BOOTSTRAP_ADMIN_PASSWORD: "admin123"
 
     # Database configuration
     KC_DB: "postgres"
