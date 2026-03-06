@@ -63,14 +63,6 @@ spec:
                   name: {{ $.Values.app.existingSecret }}
                   key: {{ . }}
             {{- end }}
-            {{- else if .Values.app.secrets }}
-            {{- range $key, $value := .Values.app.secrets }}
-            - name: {{ $key }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "openprime-keycloak.fullname" $ }}-secrets
-                  key: {{ $key }}
-            {{- end }}
             {{- end }}
           ports:
             - name: http

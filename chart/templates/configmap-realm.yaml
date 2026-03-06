@@ -37,7 +37,7 @@ data:
           "directAccessGrantsEnabled": false,
           "secret": "{{ .Values.argocd.clientSecret }}",
           "redirectUris": [
-            "https://argocd.{{ .Values.openprime.domain }}/dex/callback"
+            "https://argocd.{{ .Values.openprime.domain }}/auth/callback"
           ],
           "webOrigins": ["https://argocd.{{ .Values.openprime.domain }}"],
           "attributes": {

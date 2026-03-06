@@ -26,8 +26,16 @@ spec:
               value: "http://{{ include "openprime-keycloak.fullname" . }}:{{ .Values.service.port }}"
             - name: KEYCLOAK_USER
               value: {{ .Values.app.env.KC_BOOTSTRAP_ADMIN_USERNAME | quote }}
+            {{- if .Values.app.existingSecret }}
+            - name: KEYCLOAK_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.existingSecret }}
+                  key: KC_BOOTSTRAP_ADMIN_PASSWORD
+            {{- else }}
             - name: KEYCLOAK_PASSWORD
               value: {{ .Values.app.env.KC_BOOTSTRAP_ADMIN_PASSWORD | quote }}
+            {{- end }}
             - name: KEYCLOAK_AVAILABILITYCHECK_ENABLED
               value: "true"
             - name: KEYCLOAK_AVAILABILITYCHECK_TIMEOUT
