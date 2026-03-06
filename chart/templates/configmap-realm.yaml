@@ -69,7 +69,7 @@ data:
             "pkce.code.challenge.method": "S256"
           },
           "protocol": "openid-connect",
-          "optionalClientScopes": ["groups"]
+          "defaultClientScopes": ["groups", "web-origins", "acr", "roles", "profile", "email"]
         }
       ],
       "groups": [
