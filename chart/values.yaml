@@ -119,6 +119,9 @@ app:
   env:
     # Admin user configuration
     KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
+    # Option 2: hardcoded secrets as plain env vars (used when existingSecret is not set)
+    KC_BOOTSTRAP_ADMIN_PASSWORD: ""
+    KC_DB_PASSWORD: ""
 
     # Database configuration
     KC_DB: "postgres"
@@ -132,17 +135,13 @@ app:
     KC_HOSTNAME_STRICT: "false"
     KC_HTTP_RELATIVE_PATH: "/"
 
-  # Secrets (should be provided via external secret management)
-  # Use existing secret instead of creating one from values
+  # Option 1: use a pre-existing k8s Secret for sensitive values.
+  # When set, existingSecretKeys are injected from this secret instead of app.env.
   existingSecret: ""
-  # Keys to load from existing secret (only used when existingSecret is set)
+  # Keys to load from the existing secret (only used when existingSecret is set)
   existingSecretKeys:
     - KC_DB_PASSWORD
     - KC_BOOTSTRAP_ADMIN_PASSWORD
-  # Secrets to create (only used when existingSecret is not set)
-  secrets:
-    # Database password
-    KC_DB_PASSWORD: "keycloak123"
 
 # Health check configuration
 healthCheck:
