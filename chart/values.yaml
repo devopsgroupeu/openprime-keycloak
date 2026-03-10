@@ -116,6 +116,10 @@ keycloak:
       value: "kubernetes"
     - name: KC_PROXY_HEADERS
       value: "xforwarded"
+    - name: KC_HEALTH_ENABLED
+      value: "true"
+    - name: KC_HTTP_MANAGEMENT_PORT
+      value: "8080"
     - name: JAVA_OPTS_APPEND
       value: "-Djgroups.dns.query=openprime-keycloak-headless"
   # Extra volume mounts
