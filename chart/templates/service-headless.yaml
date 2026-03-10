@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "openprime-keycloak.fullname" . }}-headless
+  labels:
+    {{- include "openprime-keycloak.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+  selector:
+    {{- include "openprime-keycloak.selectorLabels" . | nindent 4 }}
