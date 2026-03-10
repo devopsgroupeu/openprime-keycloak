@@ -105,6 +105,9 @@ spec:
             - name: http
               containerPort: {{ .Values.service.targetPort }}
               protocol: TCP
+            - name: management
+              containerPort: 9000
+              protocol: TCP
           {{- if .Values.healthCheck.enabled }}
           livenessProbe:
             {{- toYaml .Values.healthCheck.livenessProbe | nindent 12 }}
