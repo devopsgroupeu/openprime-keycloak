@@ -103,25 +103,17 @@ affinity:
 # Keycloak specific configuration
 keycloak:
   # Enable production mode (run 'kc.sh start' instead of 'kc.sh start-dev')
-  production: true
+  production: false
   # Custom command (optional)
   command: []
   # Custom args (optional, defaults to start if production: true)
   args: []
   # Extra environment variables
   extraEnvVars:
-    - name: KC_CACHE
-      value: "ispn"
-    - name: KC_CACHE_STACK
-      value: "kubernetes"
     - name: KC_PROXY_HEADERS
       value: "xforwarded"
     - name: KC_HEALTH_ENABLED
       value: "true"
-    - name: KC_HTTP_MANAGEMENT_PORT
-      value: "8080"
-    - name: JAVA_OPTS_APPEND
-      value: "-Djgroups.dns.query=openprime-keycloak-headless"
   # Extra volume mounts
   extraVolumeMounts: []
   # Extra volumes
@@ -165,8 +157,6 @@ app:
   #   KC_BOOTSTRAP_ADMIN_USERNAME: "admin@devopsgroup.sk"
   secrets: {}
 
-# ...
-
 openprime:
   frontendUrl: app.openprime.local
   domain: openprime.io
@@ -174,18 +164,22 @@ openprime:
 healthCheck:
   enabled: true
   livenessProbe:
-    httpGet:
-      path: /health/live
-      port: 8080
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - timeout 10s bash -c '</dev/tcp/localhost/8080' || exit 1
     initialDelaySeconds: 120
     periodSeconds: 30
     timeoutSeconds: 15
     failureThreshold: 15
 
   readinessProbe:
-    httpGet:
-      path: /health/ready
-      port: 8080
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - timeout 10s bash -c '</dev/tcp/localhost/8080' || exit 1
     initialDelaySeconds: 40
     periodSeconds: 10
     timeoutSeconds: 5

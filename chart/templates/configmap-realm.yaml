@@ -27,8 +27,8 @@ data:
           "standardFlowEnabled": true,
           "implicitFlowEnabled": false,
           "directAccessGrantsEnabled": false,
-          "redirectUris": ["https://{{ .Values.openprime.frontendUrl }}/*"],
-          "webOrigins": ["https://{{ .Values.openprime.frontendUrl }}"],
+          "redirectUris": ["https://{{ .Values.openprime.frontendUrl }}/*", "http://{{ .Values.openprime.frontendUrl }}/*", "http://localhost:3000/*"],
+          "webOrigins": ["https://{{ .Values.openprime.frontendUrl }}", "http://{{ .Values.openprime.frontendUrl }}", "http://localhost:3000"],
           "protocol": "openid-connect"
         }
       ],
