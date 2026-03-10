@@ -9,38 +9,16 @@ data:
     {
       "realm": "openprime",
       "enabled": true,
+      "registrationAllowed": true,
+      "resetPasswordAllowed": true,
+      "rememberMe": true,
       "displayName": "OpenPrime",
-      "sslRequired": "none",
+      "sslRequired": "external",
       "accessTokenLifespan": 3600,
       "refreshTokenMaxReuse": 0,
       "ssoSessionIdleTimeout": 1800,
       "loginTheme": "openprime",
       "accountTheme": "openprime",
-      "clientScopes": [
-        {
-          "name": "groups",
-          "protocol": "openid-connect",
-          "attributes": {
-            "include.in.token.scope": "true",
-            "display.on.consent.screen": "true"
-          },
-          "protocolMappers": [
-            {
-              "name": "groups",
-              "protocol": "openid-connect",
-              "protocolMapper": "oidc-group-membership-mapper",
-              "consentRequired": false,
-              "config": {
-                "full.path": "false",
-                "id.token.claim": "true",
-                "access.token.claim": "true",
-                "claim.name": "groups",
-                "userinfo.token.claim": "true"
-              }
-            }
-          ]
-        }
-      ],
       "clients": [
         {
           "clientId": "openprime-app",
@@ -52,66 +30,7 @@ data:
           "redirectUris": ["https://{{ .Values.openprime.frontendUrl }}/*"],
           "webOrigins": ["https://{{ .Values.openprime.frontendUrl }}"],
           "protocol": "openid-connect"
-        },
-        {
-          "clientId": "argocd",
-          "enabled": true,
-          "publicClient": false,
-          "standardFlowEnabled": true,
-          "implicitFlowEnabled": false,
-          "directAccessGrantsEnabled": false,
-          "secret": "{{ .Values.argocd.clientSecret }}",
-          "redirectUris": [
-            "https://argocd.{{ .Values.openprime.domain }}/auth/callback"
-          ],
-          "webOrigins": ["https://argocd.{{ .Values.openprime.domain }}"],
-          "attributes": {
-            "pkce.code.challenge.method": "S256"
-          },
-          "protocol": "openid-connect",
-          "defaultClientScopes": ["groups", "web-origins", "acr", "roles", "profile", "email"]
         }
       ],
-      "groups": [
-        {
-          "name": "openprime-admins"
-        },
-        {
-          "name": "openprime-users"
-        }
-      ],
-      "users": [
-        {
-          "username": "testuser",
-          "enabled": true,
-          "firstName": "testuser",
-          "lastName": "User",
-          "email": "testuser@example.com",
-          "emailVerified": true,
-          "credentials": [
-            {
-              "type": "password",
-              "value": "password123",
-              "temporary": false
-            }
-          ],
-          "groups": ["openprime-users"]
-        },
-        {
-          "username": "adminuser",
-          "enabled": true,
-          "firstName": "adminuser",
-          "lastName": "User",
-          "email": "adminuser@example.com",
-          "emailVerified": true,
-          "credentials": [
-            {
-              "type": "password",
-              "value": "admin123",
-              "temporary": false
-            }
-          ],
-          "groups": ["openprime-admins"]
-        }
-      ]
+      "users": []
     }

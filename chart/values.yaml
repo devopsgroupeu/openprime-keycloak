@@ -70,15 +70,15 @@ ingress:
 
 resources:
   limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
     cpu: 500m
     memory: 1Gi
-  requests:
-    cpu: 200m
-    memory: 512Mi
 
 autoscaling:
-  enabled: false
-  minReplicas: 1
+  enabled: true
+  minReplicas: 2
   maxReplicas: 5
   targetCPUUtilizationPercentage: 80
   targetMemoryUtilizationPercentage: 80
@@ -102,23 +102,30 @@ affinity:
 
 # Keycloak specific configuration
 keycloak:
+  # Enable production mode (run 'kc.sh start' instead of 'kc.sh start-dev')
+  production: true
   # Custom command (optional)
   command: []
-  # Custom args (optional, defaults to start-dev if not specified)
+  # Custom args (optional, defaults to start if production: true)
   args: []
   # Extra environment variables
-  extraEnvVars: []
+  extraEnvVars:
+    - name: KC_CACHE
+      value: "ispn"
+    - name: KC_CACHE_STACK
+      value: "kubernetes"
+    - name: KC_PROXY_HEADERS
+      value: "xforwarded"
   # Extra volume mounts
   extraVolumeMounts: []
   # Extra volumes
   extraVolumes: []
-
 # Application specific configuration
 app:
   # Keycloak environment variables
   env:
     # Admin user configuration
-    KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
+    KC_BOOTSTRAP_ADMIN_USERNAME: "admin@devopsgroup.sk"
     # Option 2: hardcoded secrets as plain env vars (used when existingSecret is not set)
     KC_BOOTSTRAP_ADMIN_PASSWORD: ""
     KC_DB_PASSWORD: ""
@@ -142,27 +149,30 @@ app:
   existingSecretKeys:
     - KC_DB_PASSWORD
     - KC_BOOTSTRAP_ADMIN_PASSWORD
+    - KC_BOOTSTRAP_ADMIN_USERNAME
+    - KEYCLOAK_ADMIN
+    - KEYCLOAK_ADMIN_PASSWORD
 
-# Health check configuration
-healthCheck:
-  enabled: true
-  livenessProbe:
-    exec:
-      command:
-        - /bin/sh
-        - -c
-        - timeout 10s bash -c '</dev/tcp/localhost/8080' || exit 1
-    initialDelaySeconds: 90
+  # Option 2: Hardcoded secrets (only used if existingSecret is empty)
+  # secrets:
+  #   KC_BOOTSTRAP_ADMIN_PASSWORD: "difficult-password"
+  #   KC_BOOTSTRAP_ADMIN_USERNAME: "admin@devopsgroup.sk"
+  secrets: {}
+
+# ...
+
+openprime:
+  frontendUrl: app.openprime.local
+  domain: openprime.io
+    initialDelaySeconds: 120
     periodSeconds: 30
     timeoutSeconds: 15
     failureThreshold: 15
   readinessProbe:
-    exec:
-      command:
-        - /bin/sh
-        - -c
-        - timeout 10s bash -c '</dev/tcp/localhost/8080' || exit 1
-    initialDelaySeconds: 30
+    httpGet:
+      path: /health/ready
+      port: 8080
+    initialDelaySeconds: 40
     periodSeconds: 10
     timeoutSeconds: 5
     failureThreshold: 3

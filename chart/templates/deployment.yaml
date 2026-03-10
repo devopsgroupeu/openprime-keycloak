@@ -13,10 +13,13 @@ spec:
       {{- include "openprime-keycloak.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
+        {{- if .Values.app.existingSecret }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum | default "dynamic" }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       labels:
         {{- include "openprime-keycloak.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
@@ -45,16 +48,17 @@ spec:
             {{- toYaml .Values.keycloak.args | nindent 12 }}
           {{- else }}
           args:
-            - start-dev
+            - start
+            {{- if .Values.keycloak.production }}
+            - --optimized
+            {{- end }}
+            - --import-realm
           {{- end }}
           env:
-            {{- range $key, $value := .Values.app.env }}
-            - name: {{ $key }}
-              value: {{ $value | quote }}
-            {{- end }}
-            {{- if .Values.keycloak.extraEnvVars }}
-            {{- toYaml .Values.keycloak.extraEnvVars | nindent 12 }}
-            {{- end }}
+            {{- /* 1. Define used keys to avoid duplicates */ -}}
+            {{- $usedKeys := dict -}}
+
+            {{- /* 2. Secrets from existingSecret */ -}}
             {{- if .Values.app.existingSecret }}
             {{- range .Values.app.existingSecretKeys }}
             - name: {{ . }}
@@ -62,6 +66,39 @@ spec:
                 secretKeyRef:
                   name: {{ $.Values.app.existingSecret }}
                   key: {{ . }}
+            {{- $_ := set $usedKeys . true -}}
+            {{- end }}
+            {{- end }}
+
+            {{- /* 3. Internal secrets if no existingSecret but app.secrets is provided */ -}}
+            {{- if and (not .Values.app.existingSecret) .Values.app.secrets }}
+            {{- range $key, $value := .Values.app.secrets }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "openprime-keycloak.fullname" $ }}-secrets
+                  key: {{ $key }}
+            {{- $_ := set $usedKeys $key true -}}
+            {{- end }}
+            {{- end }}
+
+            {{- /* 4. Literal environment variables from app.env */ -}}
+            {{- range $key, $value := .Values.app.env }}
+            {{- if not (hasKey $usedKeys $key) }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- $_ := set $usedKeys $key true -}}
+            {{- end }}
+            {{- end }}
+            
+            {{- /* 5. Additional manual environment variables */ -}}
+            {{- if .Values.keycloak.extraEnvVars }}
+            {{- range .Values.keycloak.extraEnvVars }}
+            {{- if not (hasKey $usedKeys .name) }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- $_ := set $usedKeys .name true -}}
+            {{- end }}
             {{- end }}
             {{- end }}
           ports:
