@@ -13,7 +13,7 @@ data:
       "resetPasswordAllowed": true,
       "rememberMe": true,
       "displayName": "OpenPrime",
-      "sslRequired": "external",
+      "sslRequired": "none",
       "accessTokenLifespan": 3600,
       "refreshTokenMaxReuse": 0,
       "ssoSessionIdleTimeout": 1800,

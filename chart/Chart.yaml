@@ -2,7 +2,7 @@ apiVersion: v2
 name: openprime-keycloak
 description: Keycloak identity and access management for OpenPrime infrastructure platform
 type: application
-version: 0.4.6
+version: 0.4.7
 appVersion: "26.2.0"
 home: https://www.keycloak.org/
 sources:
