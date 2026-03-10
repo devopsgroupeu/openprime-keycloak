@@ -48,7 +48,11 @@ spec:
             {{- toYaml .Values.keycloak.args | nindent 12 }}
           {{- else }}
           args:
-            - start-dev
+            - start
+            {{- if .Values.keycloak.production }}
+            - --optimized
+            {{- end }}
+            - --import-realm
           {{- end }}
           env:
             {{- /* 1. Define used keys to avoid duplicates */ -}}
