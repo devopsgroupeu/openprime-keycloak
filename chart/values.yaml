@@ -164,10 +164,18 @@ app:
 openprime:
   frontendUrl: app.openprime.local
   domain: openprime.io
+
+healthCheck:
+  enabled: true
+  livenessProbe:
+    httpGet:
+      path: /health/live
+      port: 8080
     initialDelaySeconds: 120
     periodSeconds: 30
     timeoutSeconds: 15
     failureThreshold: 15
+
   readinessProbe:
     httpGet:
       path: /health/ready
@@ -208,10 +216,3 @@ realmSetup:
     requests:
       cpu: 100m
       memory: 128Mi
-
-openprime:
-  frontendUrl: app.openprime.local
-  domain: openprime.io
-
-argocd:
-  clientSecret: "argocd-keycloak-client-secret"
