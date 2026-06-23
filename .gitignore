@@ -19,3 +19,7 @@ charts/*.tgz
 # Local environment
 .env
 .env.local
+
+# Node / semantic-release
+node_modules/
+package-lock.json
