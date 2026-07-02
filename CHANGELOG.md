@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.5.0...v0.6.0) (2026-07-02)
+
+### 🚀 Features
+
+* **chart:** add PodDisruptionBudget template ([#6](https://github.com/devopsgroupeu/openprime-keycloak/issues/6)) ([ffda2b9](https://github.com/devopsgroupeu/openprime-keycloak/commit/ffda2b9b9975aa25006e8c7e6fb6c98d741960ed))
+
 ## [0.5.0](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.4.9...v0.5.0) (2026-06-23)
 
 ### 🚀 Features
