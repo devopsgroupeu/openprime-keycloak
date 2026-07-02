@@ -4,6 +4,14 @@
 
 replicaCount: 1
 
+# Pod Disruption Budget - disabled by default. Keycloak runs as a single replica
+# here, so enable this only as maxUnavailable: 0 to protect the identity pod from
+# voluntary eviction (node drains then require manual maintenance), or move to a
+# clustered HA deployment (>=2 replicas + Infinispan) before using minAvailable.
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+
 image:
   # Use custom image with OpenPrime theme baked in
   # To build: docker build -t your-registry/openprime-keycloak:26.2.0 openprime-keycloak/
