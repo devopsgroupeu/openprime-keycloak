@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.6.0...v0.7.0) (2026-07-07)
+
+### 🚀 Features
+
+* **realm:** harden production realm (sslRequired, brute-force, PKCE S256, HTTPS-only redirects) ([#7](https://github.com/devopsgroupeu/openprime-keycloak/issues/7)) ([825309b](https://github.com/devopsgroupeu/openprime-keycloak/commit/825309b9ce84dfa246c0e60c1c2dc4733386793d))
+
 ## [0.6.0](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.5.0...v0.6.0) (2026-07-02)
 
 ### 🚀 Features
