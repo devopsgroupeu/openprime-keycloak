@@ -9,11 +9,12 @@ data:
     {
       "realm": "openprime",
       "enabled": true,
-      "registrationAllowed": true,
+      "registrationAllowed": {{ .Values.openprime.realm.registrationAllowed }},
       "resetPasswordAllowed": true,
       "rememberMe": true,
       "displayName": "OpenPrime",
-      "sslRequired": "none",
+      "sslRequired": "{{ .Values.openprime.realm.sslRequired }}",
+      "bruteForceProtected": {{ .Values.openprime.realm.bruteForceProtected }},
       "accessTokenLifespan": 3600,
       "refreshTokenMaxReuse": 0,
       "ssoSessionIdleTimeout": 1800,
@@ -27,8 +28,11 @@ data:
           "standardFlowEnabled": true,
           "implicitFlowEnabled": false,
           "directAccessGrantsEnabled": false,
-          "redirectUris": ["https://{{ .Values.openprime.frontendUrl }}/*", "http://{{ .Values.openprime.frontendUrl }}/*", "http://localhost:3000/*"],
-          "webOrigins": ["https://{{ .Values.openprime.frontendUrl }}", "http://{{ .Values.openprime.frontendUrl }}", "http://localhost:3000"],
+          "redirectUris": {{ concat (list (printf "https://%s/*" .Values.openprime.frontendUrl)) (.Values.openprime.realm.extraRedirectUris | default (list)) | toJson }},
+          "webOrigins": {{ concat (list (printf "https://%s" .Values.openprime.frontendUrl)) (.Values.openprime.realm.extraWebOrigins | default (list)) | toJson }},
+          "attributes": {
+            "pkce.code.challenge.method": "S256"
+          },
           "protocol": "openid-connect"
         }
       ],

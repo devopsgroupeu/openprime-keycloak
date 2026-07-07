@@ -168,6 +168,19 @@ app:
 openprime:
   frontendUrl: app.openprime.local
   domain: openprime.io
+  # Realm security settings. Defaults are production-hardened; local/demo
+  # environments relax them via their own values (see local-testing dev values).
+  realm:
+    # Require HTTPS for external requests (allows HTTP only on the private network).
+    sslRequired: external
+    # Open self-registration is a deliberate product choice; keep it enabled.
+    # Recommended follow-up once SMTP exists: set verifyEmail to require confirmation.
+    registrationAllowed: true
+    bruteForceProtected: true
+    # Extra redirect URIs / web origins appended to the secure https://<frontendUrl>
+    # base. Prod leaves these empty; dev/demo adds its http and localhost variants.
+    extraRedirectUris: []
+    extraWebOrigins: []
 
 healthCheck:
   enabled: true
