@@ -73,8 +73,25 @@ spec:
               value: "/config"
             - name: IMPORT_FORCE
               value: "true"
+            {{- if .Values.openprime.realm.smtp.enabled }}
+            # Only enabled alongside SMTP, because the realm's SMTP password is
+            # the one value that must not sit in a ConfigMap. Verified there are
+            # no other $(...) patterns in the realm JSON for this to catch.
+            - name: IMPORT_VAR_SUBSTITUTION_ENABLED
+              value: "true"
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.app.existingSecret }}
+                  name: {{ .Values.app.existingSecret }}
+                  {{- else }}
+                  name: {{ include "openprime-keycloak.fullname" . }}-secrets
+                  {{- end }}
+                  key: {{ .Values.openprime.realm.smtp.passwordSecretKey }}
+            {{- else }}
             - name: IMPORT_VAR_SUBSTITUTION_ENABLED
               value: "false"
+            {{- end }}
           volumeMounts:
             - name: realm-config
               mountPath: /config
