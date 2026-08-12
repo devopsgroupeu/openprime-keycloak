@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.1](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.7.0...v0.7.1) (2026-08-12)
+
+### 🐛 Bug Fixes
+
+* **realm:** stop forcing a logout at 60 minutes and hide the dead password reset ([#9](https://github.com/devopsgroupeu/openprime-keycloak/issues/9)) ([0bc0ce4](https://github.com/devopsgroupeu/openprime-keycloak/commit/0bc0ce4a2d9bd9def651fe2cb71cf6460e6643ef))
+
 ## [0.7.0](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.6.0...v0.7.0) (2026-07-07)
 
 ### 🚀 Features
