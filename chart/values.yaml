@@ -181,6 +181,19 @@ openprime:
     # base. Prod leaves these empty; dev/demo adds its http and localhost variants.
     extraRedirectUris: []
     extraWebOrigins: []
+    # Session timeouts. accessTokenLifespan MUST stay well below
+    # ssoSessionIdleTimeout: the frontend only refreshes when the access token is
+    # nearly expired, so a token that outlives the idle window means the session
+    # has already gone idle by the time the first refresh is attempted — a forced
+    # logout on a fixed schedule, for every user, regardless of activity. These
+    # shipped as 3600 > 1800, which logged everyone out at ~60 minutes.
+    accessTokenLifespan: 300
+    ssoSessionIdleTimeout: 3600
+    ssoSessionMaxLifespan: 36000
+    # Password reset is advertised by the login theme but cannot work without
+    # SMTP, which is configured nowhere. Keep this false until an SMTP server
+    # exists, so the login page does not offer a dead end.
+    resetPasswordAllowed: false
 
 healthCheck:
   enabled: true
