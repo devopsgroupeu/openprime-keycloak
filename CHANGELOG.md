@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.0](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.7.1...v0.8.0) (2026-08-12)
+
+### 🚀 Features
+
+* **realm:** add SMTP support and derive password reset from it ([#10](https://github.com/devopsgroupeu/openprime-keycloak/issues/10)) ([a7f9c18](https://github.com/devopsgroupeu/openprime-keycloak/commit/a7f9c189befb7e9affc20a128c495fe2caffea95))
+
 ## [0.7.1](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.7.0...v0.7.1) (2026-08-12)
 
 ### 🐛 Bug Fixes
