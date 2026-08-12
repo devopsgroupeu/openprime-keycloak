@@ -10,7 +10,8 @@ data:
       "realm": "openprime",
       "enabled": true,
       "registrationAllowed": {{ .Values.openprime.realm.registrationAllowed }},
-      "resetPasswordAllowed": {{ .Values.openprime.realm.resetPasswordAllowed }},
+      "resetPasswordAllowed": {{ .Values.openprime.realm.smtp.enabled }},
+      "verifyEmail": {{ .Values.openprime.realm.smtp.enabled }},
       "rememberMe": true,
       "displayName": "OpenPrime",
       "sslRequired": "{{ .Values.openprime.realm.sslRequired }}",
@@ -19,6 +20,31 @@ data:
       "refreshTokenMaxReuse": 0,
       "ssoSessionIdleTimeout": {{ .Values.openprime.realm.ssoSessionIdleTimeout }},
       "ssoSessionMaxLifespan": {{ .Values.openprime.realm.ssoSessionMaxLifespan }},
+{{- with .Values.openprime.realm.smtp }}
+{{- if .enabled }}
+{{- if not .host }}{{ fail "openprime.realm.smtp.enabled is true but smtp.host is empty — that would advertise password reset with nowhere to send it" }}{{ end }}
+{{- if not .from }}{{ fail "openprime.realm.smtp.enabled is true but smtp.from is empty — Keycloak cannot send without a sender address" }}{{ end }}
+{{- if and .auth (not .user) }}{{ fail "openprime.realm.smtp.auth is true but smtp.user is empty" }}{{ end }}
+{{- if and .ssl .starttls }}{{ fail "openprime.realm.smtp: ssl and starttls are mutually exclusive — use ssl for 465, starttls for 587" }}{{ end }}
+      "smtpServer": {
+        "host": {{ .host | quote }},
+        "port": {{ .port | quote }},
+        "from": {{ .from | quote }},
+        "fromDisplayName": {{ .fromDisplayName | quote }},
+        {{- if .replyTo }}
+        "replyTo": {{ .replyTo | quote }},
+        {{- end }}
+        "ssl": {{ .ssl | quote }},
+        "starttls": {{ .starttls | quote }},
+        "auth": {{ .auth | quote }},
+        {{- if .auth }}
+        "user": {{ .user | quote }},
+        "password": "$(env:SMTP_PASSWORD)",
+        {{- end }}
+        "envelopeFrom": {{ .from | quote }}
+      },
+{{- end }}
+{{- end }}
       "loginTheme": "openprime",
       "accountTheme": "openprime",
       "clients": [

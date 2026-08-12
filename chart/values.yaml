@@ -190,10 +190,29 @@ openprime:
     accessTokenLifespan: 300
     ssoSessionIdleTimeout: 3600
     ssoSessionMaxLifespan: 36000
-    # Password reset is advertised by the login theme but cannot work without
-    # SMTP, which is configured nowhere. Keep this false until an SMTP server
-    # exists, so the login page does not offer a dead end.
-    resetPasswordAllowed: false
+    # Password reset and email verification are DERIVED from smtp.enabled below,
+    # not configured separately. Keycloak will happily show a "Forgot password"
+    # link with no mail server behind it — that is exactly the dead end this
+    # replaced, and a separate flag would let it come back the first time
+    # someone enables one without the other.
+    smtp:
+      # Off by default: a chart with no mail server must not advertise reset.
+      enabled: false
+      host: ""
+      port: 587
+      # STARTTLS on 587 is the usual pairing; set ssl instead for implicit TLS
+      # on 465. Both true is not a valid combination.
+      starttls: true
+      ssl: false
+      auth: true
+      user: ""
+      # The password is never a value. It comes from the secret named in
+      # app.existingSecret under the key below, and is substituted into the
+      # realm at import time.
+      passwordSecretKey: SMTP_PASSWORD
+      from: ""
+      fromDisplayName: OpenPrime
+      replyTo: ""
 
 healthCheck:
   enabled: true
