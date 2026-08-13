@@ -239,23 +239,44 @@ openprime:
 
 healthCheck:
   enabled: true
+  # Both probes used to be `bash -c '</dev/tcp/localhost/8080'` — a bare TCP
+  # connect. That passes for any pod with a socket open, including one answering
+  # 500 to every request, which is precisely the failure it needs to catch.
+  #
+  # Measured against a real Keycloak with its database stopped:
+  #
+  #   /health/live   200 UP     <- unchanged
+  #   /health/ready  200 UP     <- unchanged, despite being "ready"
+  #   TCP :8080      open       <- unchanged
+  #   /realms/master 500        <- the only signal that moved
+  #
+  # Keycloak 26 ships no database check in /health (its `checks` array is empty),
+  # so swapping TCP for /health/ready would have changed nothing. Readiness
+  # therefore probes a real endpoint that touches the database.
   livenessProbe:
-    exec:
-      command:
-        - /bin/sh
-        - -c
-        - timeout 10s bash -c '</dev/tcp/localhost/8080' || exit 1
+    httpGet:
+      path: /health/live
+      port: management
     initialDelaySeconds: 120
     periodSeconds: 30
     timeoutSeconds: 15
     failureThreshold: 15
 
+  # Deliberately deeper than liveness. A pod that cannot reach the database is
+  # removed from the Service rather than left serving 500s.
+  #
+  # The trade-off, stated: a total database outage takes every replica out at
+  # once, so callers get a connection failure instead of a 500. That is the
+  # right outcome — Keycloak without its database serves nothing useful — and
+  # the case this actually buys is the single sick replica, which today would
+  # keep taking traffic.
+  #
+  # `master` rather than the openprime realm on purpose: it always exists, so a
+  # failed realm import cannot leave every pod permanently NotReady.
   readinessProbe:
-    exec:
-      command:
-        - /bin/sh
-        - -c
-        - timeout 10s bash -c '</dev/tcp/localhost/8080' || exit 1
+    httpGet:
+      path: /realms/master
+      port: http
     initialDelaySeconds: 40
     periodSeconds: 10
     timeoutSeconds: 5
