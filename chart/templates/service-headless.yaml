@@ -6,6 +6,12 @@ metadata:
     {{- include "openprime-keycloak.labels" . | nindent 4 }}
 spec:
   clusterIP: None
+  # Peers must be discoverable BEFORE they are ready, or clustering deadlocks:
+  # a pod is not ready until it has joined, and it cannot join until the other
+  # pods resolve through this Service. Without this the pods still start and
+  # report Healthy — each as its own one-node cluster with its own session
+  # cache, which is the random-logout failure the cluster exists to prevent.
+  publishNotReadyAddresses: true
   ports:
     - port: 8080
       targetPort: 8080
