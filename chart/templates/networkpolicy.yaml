@@ -13,10 +13,38 @@ spec:
     - Ingress
     - Egress
   ingress:
+    {{- if .Values.keycloak.cache.enabled }}
+    # Clustering traffic between our own replicas. The configured rules below
+    # describe who may reach Keycloak from outside; none of them cover Keycloak
+    # talking to itself, so enabling a policy without this silently breaks the
+    # Infinispan cluster and puts every pod back on a local cache.
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "openprime-keycloak.selectorLabels" . | nindent 14 }}
+    {{- end }}
     {{- range .Values.networkPolicy.ingress }}
     - {{- toYaml . | nindent 6 }}
     {{- end }}
   egress:
+    {{- if .Values.keycloak.cache.enabled }}
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "openprime-keycloak.selectorLabels" . | nindent 14 }}
+    # DNS_PING resolves the headless Service, so egress to cluster DNS is part
+    # of discovery, not incidental.
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    {{- end }}
     {{- range .Values.networkPolicy.egress }}
     - {{- toYaml . | nindent 6 }}
     {{- end }}
