@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.0](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.8.0...v0.9.0) (2026-08-13)
+
+### 🚀 Features
+
+* **chart:** add clustering and make dev mode an explicit flag ([#11](https://github.com/devopsgroupeu/openprime-keycloak/issues/11)) ([8c59238](https://github.com/devopsgroupeu/openprime-keycloak/commit/8c592386e6779eeba2911d31b4599db73c252442))
+
 ## [0.8.0](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.7.1...v0.8.0) (2026-08-12)
 
 ### 🚀 Features
