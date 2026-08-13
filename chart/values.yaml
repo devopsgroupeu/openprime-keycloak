@@ -85,7 +85,11 @@ resources:
     memory: 1Gi
 
 autoscaling:
-  enabled: true
+  # Off by default, deliberately. Scaling an identity service past one replica
+  # without session replication logs users out at random, so this may only be
+  # enabled together with keycloak.cache.enabled — the chart refuses to render
+  # otherwise.
+  enabled: false
   minReplicas: 2
   maxReplicas: 5
   targetCPUUtilizationPercentage: 80
@@ -110,11 +114,30 @@ affinity:
 
 # Keycloak specific configuration
 keycloak:
-  # Enable production mode (run 'kc.sh start' instead of 'kc.sh start-dev')
-  production: false
+  # Dev mode: 'kc.sh start-dev'. Relaxes hostname checks, allows HTTP, and forces
+  # a LOCAL cache with no clustering — never correct for production.
+  #
+  # This is an explicit flag rather than something you reach by overriding `args`
+  # below. Production ran start-dev for months precisely because a raw args
+  # override silently negated `production: true` sitting three lines above it.
+  devMode: false
+  # Adds --optimized, which skips the build step at startup. Only valid on an
+  # image built with `kc.sh build`; the stock Dockerfile does not run one, so
+  # this stays false until it does.
+  optimized: false
+  # Distributed cache. Required before running more than one replica: Keycloak
+  # defaults to a LOCAL cache, so a second replica behind the ALB means users
+  # randomly hit a pod that does not know their session and get logged out
+  # mid-flow. Worse than the single replica, not better.
+  cache:
+    enabled: false
+    # 'kubernetes' resolves peers through the headless Service via JGroups
+    # DNS_PING, which is why that Service exists.
+    stack: kubernetes
   # Custom command (optional)
   command: []
-  # Custom args (optional, defaults to start if production: true)
+  # ESCAPE HATCH — when set, this replaces the args computed from devMode and
+  # optimized entirely, including any safety they provide. Prefer the flags.
   args: []
   # Extra environment variables
   extraEnvVars:

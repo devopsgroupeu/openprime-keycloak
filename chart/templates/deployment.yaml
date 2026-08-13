@@ -43,18 +43,52 @@ spec:
           command:
             {{- toYaml .Values.keycloak.command | nindent 12 }}
           {{- end }}
+{{- if and .Values.keycloak.devMode .Values.keycloak.optimized }}
+{{- fail "keycloak.devMode and keycloak.optimized are mutually exclusive — start-dev has no build to optimize" }}
+{{- end }}
+{{- if and .Values.keycloak.devMode .Values.keycloak.cache.enabled }}
+{{- fail "keycloak.devMode forces a local cache — clustering cannot work under start-dev" }}
+{{- end }}
+{{- if and .Values.keycloak.cache.enabled (lt (int .Values.replicaCount) 2) }}
+{{- fail "keycloak.cache.enabled with replicaCount < 2 does nothing; and replicaCount >= 2 without it logs users out at random. Set both." }}
+{{- end }}
+{{- if and (ge (int .Values.replicaCount) 2) (not .Values.keycloak.cache.enabled) }}
+{{- fail "replicaCount >= 2 without keycloak.cache.enabled: Keycloak defaults to a LOCAL cache, so a second replica loses sessions. Enable the cache first." }}
+{{- end }}
+{{- /* The HPA reaches >1 replica without replicaCount ever changing, so it needs
+       the same guard — the chart shipped autoscaling on with minReplicas 2 and
+       the cache off, which is exactly the combination that loses sessions. */}}
+{{- if and .Values.autoscaling.enabled (ge (int .Values.autoscaling.minReplicas) 2) (not .Values.keycloak.cache.enabled) }}
+{{- fail "autoscaling.minReplicas >= 2 without keycloak.cache.enabled: the HPA will run replicas that do not share sessions. Enable the cache first." }}
+{{- end }}
           {{- if .Values.keycloak.args }}
           args:
             {{- toYaml .Values.keycloak.args | nindent 12 }}
+          {{- else if .Values.keycloak.devMode }}
+          args:
+            - start-dev
+            - --import-realm
           {{- else }}
           args:
             - start
-            {{- if .Values.keycloak.production }}
+            {{- if .Values.keycloak.optimized }}
             - --optimized
             {{- end }}
             - --import-realm
           {{- end }}
           env:
+            {{- if .Values.keycloak.cache.enabled }}
+            # Infinispan over JGroups. The 'kubernetes' stack discovers peers by
+            # resolving the headless Service, so jgroups.dns.query must name it —
+            # the normal Service would return one ClusterIP and the pods would
+            # never find each other.
+            - name: KC_CACHE
+              value: "ispn"
+            - name: KC_CACHE_STACK
+              value: {{ .Values.keycloak.cache.stack | quote }}
+            - name: JAVA_OPTS_APPEND
+              value: "-Djgroups.dns.query={{ include "openprime-keycloak.fullname" . }}-headless.{{ .Release.Namespace }}.svc.cluster.local"
+            {{- end }}
             {{- /* 1. Define used keys to avoid duplicates */ -}}
             {{- $usedKeys := dict -}}
 
