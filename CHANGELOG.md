@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.2](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.9.1...v0.9.2) (2026-08-13)
+
+### 🐛 Bug Fixes
+
+* **chart:** probe something that fails when keycloak is broken ([#13](https://github.com/devopsgroupeu/openprime-keycloak/issues/13)) ([bbf585c](https://github.com/devopsgroupeu/openprime-keycloak/commit/bbf585cbdee3c902df452fb51be207e08b245d4c))
+
 ## [0.9.1](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.9.0...v0.9.1) (2026-08-13)
 
 ### 🐛 Bug Fixes
