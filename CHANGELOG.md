@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.1](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.9.0...v0.9.1) (2026-08-13)
+
+### 🐛 Bug Fixes
+
+* **chart:** make cluster discovery actually work behind the headless service and network policy ([#12](https://github.com/devopsgroupeu/openprime-keycloak/issues/12)) ([be6ef4e](https://github.com/devopsgroupeu/openprime-keycloak/commit/be6ef4ec347a9f193448858e33247be851b18692))
+
 ## [0.9.0](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.8.0...v0.9.0) (2026-08-13)
 
 ### 🚀 Features
