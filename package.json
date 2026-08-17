@@ -1,6 +1,6 @@
 {
   "name": "openprime-keycloak",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "private": true,
   "description": "OpenPrime Keycloak custom image, login theme, and Helm chart",
   "devDependencies": {

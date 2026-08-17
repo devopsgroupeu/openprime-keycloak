@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.3](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.9.2...v0.9.3) (2026-08-17)
+
+### ⚡ Performance Improvements
+
+* **docker:** run kc.sh build at image build time (OP-173 step 7) ([#14](https://github.com/devopsgroupeu/openprime-keycloak/issues/14)) ([5b349f2](https://github.com/devopsgroupeu/openprime-keycloak/commit/5b349f28fe66e84bee00a6c565911154dfa714ef))
+
 ## [0.9.2](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.9.1...v0.9.2) (2026-08-13)
 
 ### 🐛 Bug Fixes
