@@ -121,9 +121,19 @@ keycloak:
   # below. Production ran start-dev for months precisely because a raw args
   # override silently negated `production: true` sitting three lines above it.
   devMode: false
-  # Adds --optimized, which skips the build step at startup. Only valid on an
-  # image built with `kc.sh build`; the stock Dockerfile does not run one, so
-  # this stays false until it does.
+  # Adds --optimized, which skips the build step at startup. The Dockerfile in
+  # this repo runs `kc.sh build`, so it is valid for the image built here —
+  # measured at ~15s of boot instead of ~30s, on the critical path of every
+  # rolling restart.
+  #
+  # Default stays false because the chart also serves images that were not built
+  # that way, and Keycloak refuses to start with --optimized on an unbuilt image.
+  # Both failure modes are loud at boot, never a silently misconfigured server:
+  #   unbuilt image  -> "The '--optimized' flag was used for first ever start"
+  #   values drift   -> "build time options have values that differ from what is
+  #                      persisted", naming the options
+  # If you set this true, the image's baked build options (KC_DB,
+  # KC_HEALTH_ENABLED, KC_HTTP_RELATIVE_PATH) must match what you set here.
   optimized: false
   # Distributed cache. Required before running more than one replica: Keycloak
   # defaults to a LOCAL cache, so a second replica behind the ALB means users
