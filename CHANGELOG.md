@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.6](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.9.5...v0.9.6) (2026-08-30)
+
+### 🐛 Bug Fixes
+
+* **realm:** wait for keycloak before configuring smtp instead of relying on a job restart ([f9de6d8](https://github.com/devopsgroupeu/openprime-keycloak/commit/f9de6d81f8b87fbea64126e51f1740504fdd48bc))
+
 ## [0.9.5](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.9.4...v0.9.5) (2026-08-30)
 
 ### 🐛 Bug Fixes
