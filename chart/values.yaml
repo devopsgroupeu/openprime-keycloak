@@ -312,6 +312,10 @@ networkPolicy:
 # Realm configuration setup using keycloak-config-cli
 realmSetup:
   enabled: true
+  # Budget for the smtp-setup step to wait for Keycloak. Longer than the
+  # config-cli availability check because a chart bump rolls the Deployment
+  # while this Job is already running.
+  keycloakWaitSeconds: 180
   image:
     repository: adorsys/keycloak-config-cli
     tag: "6.4.0-26"

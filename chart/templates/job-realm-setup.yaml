@@ -100,6 +100,8 @@ spec:
               value: "http://{{ include "openprime-keycloak.fullname" . }}:{{ .Values.service.port }}"
             - name: REALM
               value: {{ .Values.openprime.realm.name | default "openprime" | quote }}
+            - name: KEYCLOAK_WAIT_SECONDS
+              value: {{ .Values.realmSetup.keycloakWaitSeconds | default 180 | quote }}
             {{- if .Values.app.existingSecret }}
             - name: KEYCLOAK_USER
               valueFrom:
@@ -167,8 +169,28 @@ spec:
               fi
 
               KCADM=/opt/keycloak/bin/kcadm.sh
-              "$KCADM" config credentials --server "$KEYCLOAK_URL" \
-                --realm master --user "$KEYCLOAK_USER" --password "$KEYCLOAK_PASSWORD"
+
+              # Wait for Keycloak the way config-cli does. This container starts
+              # after the initContainer, but a chart bump rolls the Deployment at
+              # the same time, so the Service can have no ready endpoint when we
+              # arrive. Without this the step dies on "Connection refused" and
+              # only survives because the Job restarts it — which is luck, not
+              # design, and it burns a backoffLimit attempt every deploy.
+              deadline=$(( $(date +%s) + ${KEYCLOAK_WAIT_SECONDS} ))
+              until "$KCADM" config credentials --server "$KEYCLOAK_URL" \
+                      --realm master --user "$KEYCLOAK_USER" \
+                      --password "$KEYCLOAK_PASSWORD" 2>/dev/null; do
+                if [ "$(date +%s)" -ge "$deadline" ]; then
+                  echo "keycloak did not become reachable at ${KEYCLOAK_URL} within ${KEYCLOAK_WAIT_SECONDS}s" >&2
+                  # One last attempt, unsilenced, so the real error reaches the log
+                  # rather than a timeout message that hides it.
+                  "$KCADM" config credentials --server "$KEYCLOAK_URL" \
+                    --realm master --user "$KEYCLOAK_USER" --password "$KEYCLOAK_PASSWORD"
+                  exit 1
+                fi
+                echo "keycloak not ready yet, retrying..."
+                sleep 5
+              done
 
               smtp_json() {
                 cat <<JSON
