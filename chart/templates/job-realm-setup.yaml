@@ -21,7 +21,11 @@ spec:
         app.kubernetes.io/component: realm-setup
     spec:
       restartPolicy: OnFailure
-      containers:
+      # config-cli imports the realm; the SMTP step then proves mail works and
+      # only afterwards switches on the flows that depend on it. initContainer
+      # rather than a second container because containers run in parallel and
+      # this ordering is the whole point.
+      initContainers:
         - name: keycloak-config-cli
           image: "{{ .Values.realmSetup.image.repository }}:{{ .Values.realmSetup.image.tag }}"
           imagePullPolicy: {{ .Values.realmSetup.image.pullPolicy }}
@@ -73,37 +77,136 @@ spec:
               value: "/config"
             - name: IMPORT_FORCE
               value: "true"
-            {{- if .Values.openprime.realm.smtp.enabled }}
-            # Only enabled alongside SMTP, because the realm's SMTP password is
-            # the one value that must not sit in a ConfigMap. Verified there are
-            # no other $(...) patterns in the realm JSON for this to catch.
-            #
-            # VARSUBSTITUTION is one word. keycloak-config-cli binds
-            # `import.var-substitution.enabled`, which Spring relaxed binding
-            # spells IMPORT_VARSUBSTITUTION_ENABLED. IMPORT_VAR_SUBSTITUTION_ENABLED
-            # binds to a property that does not exist, is accepted silently, and
-            # leaves the default of false — which ships the literal
-            # `$(env:SMTP_PASSWORD)` into the realm and fails at the first send
-            # with `535 Authentication Credentials Invalid`.
-            - name: IMPORT_VARSUBSTITUTION_ENABLED
-              value: "true"
-            - name: SMTP_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  {{- if .Values.app.existingSecret }}
-                  name: {{ .Values.app.existingSecret }}
-                  {{- else }}
-                  name: {{ include "openprime-keycloak.fullname" . }}-secrets
-                  {{- end }}
-                  key: {{ .Values.openprime.realm.smtp.passwordSecretKey }}
-            {{- else }}
+            # No variable substitution: the realm JSON carries no secrets any
+            # more. A placeholder that a third-party tool must recognise fails
+            # silently when it does not — the realm then holds the literal
+            # string as its SMTP password and everything still reports success.
             - name: IMPORT_VARSUBSTITUTION_ENABLED
               value: "false"
-            {{- end }}
           volumeMounts:
             - name: realm-config
               mountPath: /config
               readOnly: true
+          resources:
+            {{- toYaml .Values.realmSetup.resources | nindent 12 }}
+      containers:
+        - name: smtp-setup
+          # The Keycloak image already carries kcadm.sh and a JRE, so this needs
+          # no extra image and installs nothing at run time.
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: KEYCLOAK_URL
+              value: "http://{{ include "openprime-keycloak.fullname" . }}:{{ .Values.service.port }}"
+            - name: REALM
+              value: {{ .Values.openprime.realm.name | default "openprime" | quote }}
+            {{- if .Values.app.existingSecret }}
+            - name: KEYCLOAK_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.existingSecret }}
+                  key: KC_BOOTSTRAP_ADMIN_USERNAME
+            - name: KEYCLOAK_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.existingSecret }}
+                  key: KC_BOOTSTRAP_ADMIN_PASSWORD
+            {{- else }}
+            - name: KEYCLOAK_USER
+              value: {{ .Values.app.env.KC_BOOTSTRAP_ADMIN_USERNAME | quote }}
+            - name: KEYCLOAK_PASSWORD
+              value: {{ .Values.app.env.KC_BOOTSTRAP_ADMIN_PASSWORD | quote }}
+            {{- end }}
+{{- with .Values.openprime.realm.smtp }}
+{{- if .enabled }}
+{{- if not .host }}{{ fail "openprime.realm.smtp.enabled is true but smtp.host is empty — that would advertise password reset with nowhere to send it" }}{{ end }}
+{{- if not .from }}{{ fail "openprime.realm.smtp.enabled is true but smtp.from is empty — Keycloak cannot send without a sender address" }}{{ end }}
+{{- if and .auth (not .user) }}{{ fail "openprime.realm.smtp.auth is true but smtp.user is empty" }}{{ end }}
+{{- if and .ssl .starttls }}{{ fail "openprime.realm.smtp: ssl and starttls are mutually exclusive — use ssl for 465, starttls for 587" }}{{ end }}
+            - name: SMTP_ENABLED
+              value: "true"
+            - name: SMTP_HOST
+              value: {{ .host | quote }}
+            - name: SMTP_PORT
+              value: {{ .port | quote }}
+            - name: SMTP_FROM
+              value: {{ .from | quote }}
+            - name: SMTP_FROM_DISPLAY_NAME
+              value: {{ .fromDisplayName | quote }}
+            - name: SMTP_REPLY_TO
+              value: {{ .replyTo | default .from | quote }}
+            - name: SMTP_SSL
+              value: {{ .ssl | quote }}
+            - name: SMTP_STARTTLS
+              value: {{ .starttls | quote }}
+            - name: SMTP_AUTH
+              value: {{ .auth | quote }}
+            - name: SMTP_USER
+              value: {{ .user | quote }}
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  {{- if $.Values.app.existingSecret }}
+                  name: {{ $.Values.app.existingSecret }}
+                  {{- else }}
+                  name: {{ include "openprime-keycloak.fullname" $ }}-secrets
+                  {{- end }}
+                  key: {{ .passwordSecretKey }}
+{{- else }}
+            - name: SMTP_ENABLED
+              value: "false"
+{{- end }}
+{{- end }}
+          command:
+            - /bin/bash
+            - -ec
+            - |
+              if [ "${SMTP_ENABLED}" != "true" ]; then
+                echo "smtp disabled - password reset stays off, nothing to do"
+                exit 0
+              fi
+
+              KCADM=/opt/keycloak/bin/kcadm.sh
+              "$KCADM" config credentials --server "$KEYCLOAK_URL" \
+                --realm master --user "$KEYCLOAK_USER" --password "$KEYCLOAK_PASSWORD"
+
+              smtp_json() {
+                cat <<JSON
+              {
+                "host": "${SMTP_HOST}",
+                "port": "${SMTP_PORT}",
+                "from": "${SMTP_FROM}",
+                "fromDisplayName": "${SMTP_FROM_DISPLAY_NAME}",
+                "replyTo": "${SMTP_REPLY_TO}",
+                "envelopeFrom": "${SMTP_FROM}",
+                "ssl": "${SMTP_SSL}",
+                "starttls": "${SMTP_STARTTLS}",
+                "auth": "${SMTP_AUTH}",
+                "user": "${SMTP_USER}",
+                "password": "${SMTP_PASSWORD}"
+              }
+              JSON
+              }
+
+              # Prove mail can leave the cluster BEFORE anything advertises a
+              # reset link. A non-2xx here fails the Job, which fails the sync —
+              # so a deploy cannot leave production offering a reset that dies
+              # at send time. This is the check that today's outage lacked.
+              echo "testing SMTP against ${SMTP_HOST}:${SMTP_PORT} ..."
+              smtp_json | "$KCADM" create "realms/${REALM}/testSMTPConnection" -f -
+              echo "SMTP OK"
+
+              # Only now switch on the flows that depend on working mail. The
+              # realm import leaves both false, so the unsafe combination
+              # (reset advertised, mail broken) is never a persisted state.
+              "$KCADM" update "realms/${REALM}" -f - <<JSON
+              {
+                "resetPasswordAllowed": true,
+                "verifyEmail": true,
+                "smtpServer": $(smtp_json)
+              }
+              JSON
+              echo "password reset enabled"
           resources:
             {{- toYaml .Values.realmSetup.resources | nindent 12 }}
       volumes:
