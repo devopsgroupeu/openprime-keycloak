@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.5](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.9.4...v0.9.5) (2026-08-30)
+
+### 🐛 Bug Fixes
+
+* **realm:** gate password reset on a proven SMTP send instead of a placeholder ([06078a0](https://github.com/devopsgroupeu/openprime-keycloak/commit/06078a00b4c0118e68984a10051f0c60bf3ba965))
+
 ## [0.9.4](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.9.3...v0.9.4) (2026-08-30)
 
 ### 🐛 Bug Fixes
