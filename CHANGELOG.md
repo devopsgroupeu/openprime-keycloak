@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.4](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.9.3...v0.9.4) (2026-08-30)
+
+### 🐛 Bug Fixes
+
+* **realm:** correct the keycloak-config-cli var-substitution env var name ([ac12ff7](https://github.com/devopsgroupeu/openprime-keycloak/commit/ac12ff78c13880ed75e9a29716ef92738da78acf))
+
 ## [0.9.3](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.9.2...v0.9.3) (2026-08-17)
 
 ### ⚡ Performance Improvements
