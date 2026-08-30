@@ -77,7 +77,15 @@ spec:
             # Only enabled alongside SMTP, because the realm's SMTP password is
             # the one value that must not sit in a ConfigMap. Verified there are
             # no other $(...) patterns in the realm JSON for this to catch.
-            - name: IMPORT_VAR_SUBSTITUTION_ENABLED
+            #
+            # VARSUBSTITUTION is one word. keycloak-config-cli binds
+            # `import.var-substitution.enabled`, which Spring relaxed binding
+            # spells IMPORT_VARSUBSTITUTION_ENABLED. IMPORT_VAR_SUBSTITUTION_ENABLED
+            # binds to a property that does not exist, is accepted silently, and
+            # leaves the default of false — which ships the literal
+            # `$(env:SMTP_PASSWORD)` into the realm and fails at the first send
+            # with `535 Authentication Credentials Invalid`.
+            - name: IMPORT_VARSUBSTITUTION_ENABLED
               value: "true"
             - name: SMTP_PASSWORD
               valueFrom:
@@ -89,7 +97,7 @@ spec:
                   {{- end }}
                   key: {{ .Values.openprime.realm.smtp.passwordSecretKey }}
             {{- else }}
-            - name: IMPORT_VAR_SUBSTITUTION_ENABLED
+            - name: IMPORT_VARSUBSTITUTION_ENABLED
               value: "false"
             {{- end }}
           volumeMounts:
