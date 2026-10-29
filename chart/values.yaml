@@ -35,7 +35,9 @@ serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
-  automount: true
+  # Keycloak never calls the Kubernetes API: the 'kubernetes' cache stack finds
+  # peers with JGroups DNS_PING against the headless Service, not the API.
+  automount: false
 
 podAnnotations: {}
 podLabels: {}
@@ -44,6 +46,8 @@ podSecurityContext:
   fsGroup: 1000
   runAsNonRoot: true
   runAsUser: 1000
+  seccompProfile:
+    type: RuntimeDefault
 
 securityContext:
   allowPrivilegeEscalation: false
