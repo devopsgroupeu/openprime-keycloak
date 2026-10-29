@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.7](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.9.6...v0.9.7) (2026-10-29)
+
+### 🐛 Bug Fixes
+
+* harden the realm-setup job and keycloak pod security context (OP-257) ([#18](https://github.com/devopsgroupeu/openprime-keycloak/issues/18)) ([870925a](https://github.com/devopsgroupeu/openprime-keycloak/commit/870925ae8408a883eb11cfa7c41d5427be19da89))
+
 ## [0.9.6](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.9.5...v0.9.6) (2026-08-30)
 
 ### 🐛 Bug Fixes
