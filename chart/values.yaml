@@ -35,7 +35,9 @@ serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
-  automount: true
+  # Keycloak never calls the Kubernetes API: the 'kubernetes' cache stack finds
+  # peers with JGroups DNS_PING against the headless Service, not the API.
+  automount: false
 
 podAnnotations: {}
 podLabels: {}
@@ -44,6 +46,8 @@ podSecurityContext:
   fsGroup: 1000
   runAsNonRoot: true
   runAsUser: 1000
+  seccompProfile:
+    type: RuntimeDefault
 
 securityContext:
   allowPrivilegeEscalation: false
@@ -320,6 +324,17 @@ realmSetup:
     repository: adorsys/keycloak-config-cli
     tag: "6.4.0-26"
     pullPolicy: IfNotPresent
+  # Both images in the Job declare a numeric non-root USER (config-cli 65534,
+  # Keycloak 1000), so runAsNonRoot needs no runAsUser to be verifiable.
+  podSecurityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
   resources:
     limits:
       cpu: 200m

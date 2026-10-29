@@ -17,10 +17,12 @@ spec:
         checksum/secrets: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum | default "dynamic" }}
         {{- end }}
       labels:
-        {{- include "openprime-keycloak.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: realm-setup
+        {{- include "openprime-keycloak.realmSetupSelectorLabels" . | nindent 8 }}
     spec:
       restartPolicy: OnFailure
+      serviceAccountName: {{ include "openprime-keycloak.fullname" . }}-realm-setup
+      securityContext:
+        {{- toYaml .Values.realmSetup.podSecurityContext | nindent 8 }}
       # config-cli imports the realm; the SMTP step then proves mail works and
       # only afterwards switches on the flows that depend on it. initContainer
       # rather than a second container because containers run in parallel and
@@ -29,6 +31,8 @@ spec:
         - name: keycloak-config-cli
           image: "{{ .Values.realmSetup.image.repository }}:{{ .Values.realmSetup.image.tag }}"
           imagePullPolicy: {{ .Values.realmSetup.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.realmSetup.securityContext | nindent 12 }}
           env:
             - name: KEYCLOAK_URL
               value: "http://{{ include "openprime-keycloak.fullname" . }}:{{ .Values.service.port }}"
@@ -95,6 +99,8 @@ spec:
           # no extra image and installs nothing at run time.
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.realmSetup.securityContext | nindent 12 }}
           env:
             - name: KEYCLOAK_URL
               value: "http://{{ include "openprime-keycloak.fullname" . }}:{{ .Values.service.port }}"
