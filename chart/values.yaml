@@ -4,6 +4,12 @@
 
 replicaCount: 1
 
+# RollingUpdate keeps Keycloak serving through restarts.
+# Recreate stops every pod before the new ones start. Use it for the sync that
+# changes the Keycloak minor version: the database migration is one-way and old
+# and new versions must not run side by side. Switch back afterwards.
+updateStrategy: RollingUpdate
+
 # Pod Disruption Budget - disabled by default. Keycloak runs as a single replica
 # here, so enable this only as maxUnavailable: 0 to protect the identity pod from
 # voluntary eviction (node drains then require manual maintenance), or move to a
@@ -14,14 +20,14 @@ podDisruptionBudget:
 
 image:
   # Use custom image with OpenPrime theme baked in
-  # To build: docker build -t your-registry/openprime-keycloak:26.2.0 openprime-keycloak/
+  # To build: docker build -t your-registry/openprime-keycloak:26.8.1 openprime-keycloak/
   repository: ghcr.io/devopsgroupeu/openprime-keycloak
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: latest
   # For custom image with theme:
   # repository: your-registry/openprime-keycloak
-  # tag: "26.2.0"
+  # tag: "26.8.1"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -322,7 +328,7 @@ realmSetup:
   keycloakWaitSeconds: 180
   image:
     repository: adorsys/keycloak-config-cli
-    tag: "6.4.0-26"
+    tag: "6.5.1-26.5.5"
     pullPolicy: IfNotPresent
   # Both images in the Job declare a numeric non-root USER (config-cli 65534,
   # Keycloak 1000), so runAsNonRoot needs no runAsUser to be verifiable.

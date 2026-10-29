@@ -1,4 +1,4 @@
-FROM quay.io/keycloak/keycloak:26.2.0
+FROM quay.io/keycloak/keycloak:26.8.1
 
 # Copy OpenPrime custom theme
 COPY theme /opt/keycloak/themes/
@@ -21,7 +21,7 @@ USER 1000
 # runtime value contradicts a persisted one, naming the option — so a mismatch is
 # a crashloop, not a silently wrong server.
 #
-# cache/cache-stack are deliberately absent: they are RUNTIME options in 26.2
+# cache/cache-stack are deliberately absent: they are RUNTIME options in 26.8
 # ("will be ignored during build time"), and the chart sets them only when
 # clustering is on. Baking them would force ispn on single-replica installs too.
 RUN KC_DB=postgres \
