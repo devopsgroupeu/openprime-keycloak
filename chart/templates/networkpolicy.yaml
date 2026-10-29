@@ -23,6 +23,16 @@ spec:
             matchLabels:
               {{- include "openprime-keycloak.selectorLabels" . | nindent 14 }}
     {{- end }}
+    {{- if .Values.realmSetup.enabled }}
+    # The realm-setup Job configures Keycloak through its Service.
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "openprime-keycloak.realmSetupSelectorLabels" . | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.service.targetPort }}
+    {{- end }}
     {{- range .Values.networkPolicy.ingress }}
     - {{- toYaml . | nindent 6 }}
     {{- end }}
@@ -48,4 +58,41 @@ spec:
     {{- range .Values.networkPolicy.egress }}
     - {{- toYaml . | nindent 6 }}
     {{- end }}
+{{- if .Values.realmSetup.enabled }}
+---
+# The realm-setup Job has labels of its own, so the policy above does not cover
+# it. It holds the master admin credentials and only ever talks to Keycloak:
+# that and DNS is all it may reach, and nothing may reach it.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "openprime-keycloak.fullname" . }}-realm-setup
+  labels:
+    {{- include "openprime-keycloak.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "openprime-keycloak.realmSetupSelectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "openprime-keycloak.selectorLabels" . | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.service.targetPort }}
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+{{- end }}
 {{- end }}

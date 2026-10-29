@@ -51,6 +51,17 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Realm-setup Job pod labels. Deliberately not the selector labels above: a pod
+carrying those is a Service endpoint (and is matched by the PDB and the
+NetworkPolicy) although nothing in it listens.
+*/}}
+{{- define "openprime-keycloak.realmSetupSelectorLabels" -}}
+app.kubernetes.io/name: {{ printf "%s-realm-setup" (include "openprime-keycloak.name" .) | trunc 63 | trimSuffix "-" }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: realm-setup
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "openprime-keycloak.serviceAccountName" -}}
