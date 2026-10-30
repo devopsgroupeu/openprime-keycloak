@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.1](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.10.0...v0.10.1) (2026-10-30)
+
+### 🐛 Bug Fixes
+
+* **realm:** enforce a password policy (OP-257) ([#30](https://github.com/devopsgroupeu/openprime-keycloak/issues/30)) ([7c83bf2](https://github.com/devopsgroupeu/openprime-keycloak/commit/7c83bf241e2e9509033b0a82e4ad058aebaf3256))
+
 ## [0.10.0](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.9.7...v0.10.0) (2026-10-30)
 
 ### 🚀 Features
