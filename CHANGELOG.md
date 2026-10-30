@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.0](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.9.7...v0.10.0) (2026-10-30)
+
+### 🚀 Features
+
+* **keycloak:** upgrade to 26.8.1 (OP-257) ([#29](https://github.com/devopsgroupeu/openprime-keycloak/issues/29)) ([ede9679](https://github.com/devopsgroupeu/openprime-keycloak/commit/ede96794c5090f86465b4c18a44aeb01903662cb))
+
 ## [0.9.7](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.9.6...v0.9.7) (2026-10-29)
 
 ### 🐛 Bug Fixes
