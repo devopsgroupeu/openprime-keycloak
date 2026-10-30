@@ -22,6 +22,7 @@ data:
       "displayName": "OpenPrime",
       "sslRequired": "{{ .Values.openprime.realm.sslRequired }}",
       "bruteForceProtected": {{ .Values.openprime.realm.bruteForceProtected }},
+      "passwordPolicy": {{ .Values.openprime.realm.passwordPolicy | toJson }},
       "accessTokenLifespan": {{ .Values.openprime.realm.accessTokenLifespan }},
       "refreshTokenMaxReuse": 0,
       "ssoSessionIdleTimeout": {{ .Values.openprime.realm.ssoSessionIdleTimeout }},

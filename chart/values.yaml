@@ -220,6 +220,9 @@ openprime:
     # Recommended follow-up once SMTP exists: set verifyEmail to require confirmation.
     registrationAllowed: true
     bruteForceProtected: true
+    # Checked only when a password is set or changed: existing passwords keep
+    # working. Set "" to remove the policy; an older chart will not remove it.
+    passwordPolicy: "length(12) and maxLength(128) and notUsername and notEmail"
     # Extra redirect URIs / web origins appended to the secure https://<frontendUrl>
     # base. Prod leaves these empty; dev/demo adds its http and localhost variants.
     extraRedirectUris: []
