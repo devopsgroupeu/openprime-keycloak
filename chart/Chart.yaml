@@ -3,7 +3,7 @@ name: openprime-keycloak
 description: Keycloak identity and access management for OpenPrime infrastructure platform
 type: application
 version: 0.4.9
-appVersion: "26.2.0"
+appVersion: "26.8.1"
 home: https://www.keycloak.org/
 sources:
   - https://github.com/keycloak/keycloak

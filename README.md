@@ -12,7 +12,7 @@ This repository contains:
 
 ### Docker Image
 
-Based on `quay.io/keycloak/keycloak:26.2.0` with:
+Based on `quay.io/keycloak/keycloak:26.8.1` with:
 - OpenPrime custom theme pre-installed
 - Production-ready configuration
 
@@ -36,6 +36,11 @@ See `chart/values.yaml` for all available configuration options.
 | `image.repository` | Keycloak image | `ghcr.io/devopsgroupeu/openprime-keycloak` |
 | `image.tag` | Image tag | `latest` |
 | `realmSetup.enabled` | Enable realm auto-configuration | `true` |
+| `updateStrategy` | `RollingUpdate`, or `Recreate` for a Keycloak minor upgrade | `RollingUpdate` |
+
+### Upgrading Keycloak
+
+A minor upgrade (for example 26.2 to 26.8) migrates the database one way, and the old and new versions must not run against it at the same time. Back up the database first: rolling back means restoring that backup together with the old image. Sync the upgrade with `updateStrategy: Recreate`, which stops every pod before the new ones start, then set it back to `RollingUpdate`.
 
 ## Development
 

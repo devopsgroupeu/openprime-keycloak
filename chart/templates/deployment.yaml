@@ -8,6 +8,11 @@ spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
+  {{- if not (has .Values.updateStrategy (list "RollingUpdate" "Recreate")) }}
+  {{- fail "updateStrategy must be RollingUpdate or Recreate" }}
+  {{- end }}
+  strategy:
+    type: {{ .Values.updateStrategy }}
   selector:
     matchLabels:
       {{- include "openprime-keycloak.selectorLabels" . | nindent 6 }}
