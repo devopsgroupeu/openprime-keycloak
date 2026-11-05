@@ -1,4 +1,4 @@
-FROM quay.io/keycloak/keycloak:26.8.1
+FROM quay.io/keycloak/keycloak:26.8.2
 
 # Copy OpenPrime custom theme
 COPY theme /opt/keycloak/themes/
