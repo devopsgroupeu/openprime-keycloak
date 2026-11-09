@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.3](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.10.2...v0.10.3) (2026-11-09)
+
+### 🐛 Bug Fixes
+
+* **chart:** take Keycloak passwords only from a Secret and refuse to render without them (OP-270) ([#34](https://github.com/devopsgroupeu/openprime-keycloak/issues/34)) ([82235b2](https://github.com/devopsgroupeu/openprime-keycloak/commit/82235b23be8930a9d79bebb9644a9f6563471e4f))
+
 ## [0.10.2](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.10.1...v0.10.2) (2026-11-09)
 
 ### 🏗️ Build System
