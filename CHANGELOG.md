@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.2](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.10.1...v0.10.2) (2026-11-09)
+
+### 🏗️ Build System
+
+* **deps:** bump keycloak/keycloak ([#32](https://github.com/devopsgroupeu/openprime-keycloak/issues/32)) ([a3dacb4](https://github.com/devopsgroupeu/openprime-keycloak/commit/a3dacb45ac5d211c3ef7e8b8af6ae974b062e11b))
+
 ## [0.10.1](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.10.0...v0.10.1) (2026-10-30)
 
 ### 🐛 Bug Fixes
