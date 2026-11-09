@@ -18,11 +18,17 @@ Based on `quay.io/keycloak/keycloak:26.8.1` with:
 
 ### Helm Chart
 
-Deploy Keycloak to Kubernetes with customizable values:
+Deploy Keycloak to Kubernetes with customizable values. The chart refuses to render without the database and bootstrap-admin passwords, and refuses a password given as a plain `app.env` value; pass them from a Secret:
 
 ```bash
-helm install openprime-keycloak ./chart
+kubectl create secret generic keycloak-secrets \
+  --from-literal=KC_DB_PASSWORD=... --from-literal=KC_BOOTSTRAP_ADMIN_PASSWORD=...
+helm install openprime-keycloak ./chart \
+  --set app.existingSecret=keycloak-secrets \
+  --set 'app.existingSecretKeys={KC_DB_PASSWORD,KC_BOOTSTRAP_ADMIN_PASSWORD}'
 ```
+
+`app.secrets` (the chart then creates the Secret) works too. `keycloak.devMode: true` (local `start-dev`) skips the password requirement.
 
 ## Configuration
 
@@ -36,6 +42,9 @@ See `chart/values.yaml` for all available configuration options.
 | `image.repository` | Keycloak image | `ghcr.io/devopsgroupeu/openprime-keycloak` |
 | `image.tag` | Image tag | `latest` |
 | `realmSetup.enabled` | Enable realm auto-configuration | `true` |
+| `app.existingSecret` | Secret holding the keys listed in `app.existingSecretKeys` (`KC_DB_PASSWORD` and `KC_BOOTSTRAP_ADMIN_PASSWORD` are required) | `""` |
+| `app.secrets` | Alternative: values the chart puts into its own Secret | `{}` |
+| `app.env.KC_BOOTSTRAP_ADMIN_USERNAME` | Bootstrap admin user | `admin` |
 | `updateStrategy` | `RollingUpdate`, or `Recreate` for a Keycloak minor upgrade | `RollingUpdate` |
 
 ### Upgrading Keycloak

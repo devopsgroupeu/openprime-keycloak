@@ -1,0 +1,6 @@
+# Values for CI only: the chart refuses to render without its passwords, so
+# lint and template run with these placeholders (OP-270).
+app:
+  secrets:
+    KC_DB_PASSWORD: ci-db-password
+    KC_BOOTSTRAP_ADMIN_PASSWORD: ci-admin-password

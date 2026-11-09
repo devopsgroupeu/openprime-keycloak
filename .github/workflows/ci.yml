@@ -32,14 +32,23 @@ jobs:
           version: "v3.12.0"
 
       - name: Lint chart
-        run: helm lint chart
+        run: helm lint chart -f chart/ci/test-values.yaml
 
-      - name: Template chart (default values must render)
-        run: helm template ci chart > /dev/null
+      - name: Template chart (CI values must render)
+        run: helm template ci chart -f chart/ci/test-values.yaml > /dev/null
+
+      # The chart must refuse to render without its passwords (OP-270).
+      - name: Template chart (default values must refuse to render)
+        run: |
+          if helm template ci chart > /dev/null 2> err.txt; then
+            echo "::error::rendered without KC_DB_PASSWORD and KC_BOOTSTRAP_ADMIN_PASSWORD"
+            exit 1
+          fi
+          grep -q "KC_DB_PASSWORD is required" err.txt
 
       - name: Validate rendered realm JSON parses
         run: |
-          helm template ci chart --show-only templates/configmap-realm.yaml \
+          helm template ci chart -f chart/ci/test-values.yaml --show-only templates/configmap-realm.yaml \
             | sed -n '/openprime-realm.json:/,$p' | sed '1d;s/^    //' \
             | python3 -c "import json,sys; json.load(sys.stdin); print('realm JSON valid')"
 

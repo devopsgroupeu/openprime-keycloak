@@ -48,6 +48,23 @@ spec:
           command:
             {{- toYaml .Values.keycloak.command | nindent 12 }}
           {{- end }}
+{{- /* Passwords come from a Secret, never from app.env, and a release without
+     them would only crashloop on the database login (OP-270). devMode (local
+     start-dev) is exempt from the requirement, not from the app.env rule. */ -}}
+{{- range $key, $value := .Values.app.env }}
+{{- if and (hasSuffix "PASSWORD" $key) $value }}
+{{- fail (printf "app.env.%s: passwords must not be plain env values; use app.existingSecret (listed in app.existingSecretKeys) or app.secrets" $key) }}
+{{- end }}
+{{- end }}
+{{- if not .Values.keycloak.devMode }}
+{{- range $key := list "KC_DB_PASSWORD" "KC_BOOTSTRAP_ADMIN_PASSWORD" }}
+{{- $fromExisting := and $.Values.app.existingSecret (has $key $.Values.app.existingSecretKeys) }}
+{{- $fromSecrets := and $.Values.app.secrets (get $.Values.app.secrets $key) }}
+{{- if not (or $fromExisting $fromSecrets) }}
+{{- fail (printf "%s is required: list it in app.existingSecretKeys with app.existingSecret, or set app.secrets.%s" $key $key) }}
+{{- end }}
+{{- end }}
+{{- end }}
 {{- if and .Values.keycloak.devMode .Values.keycloak.optimized }}
 {{- fail "keycloak.devMode and keycloak.optimized are mutually exclusive — start-dev has no build to optimize" }}
 {{- end }}
