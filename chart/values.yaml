@@ -173,11 +173,10 @@ keycloak:
 app:
   # Keycloak environment variables
   env:
-    # Admin user configuration
-    KC_BOOTSTRAP_ADMIN_USERNAME: "admin@devopsgroup.sk"
-    # Option 2: hardcoded secrets as plain env vars (used when existingSecret is not set)
-    KC_BOOTSTRAP_ADMIN_PASSWORD: ""
-    KC_DB_PASSWORD: ""
+    # Admin user configuration. Passwords never go here: they come from
+    # existingSecret or secrets below, and the chart refuses to render without
+    # them (outside keycloak.devMode) or with a password in app.env (OP-270).
+    KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
 
     # Database configuration
     KC_DB: "postgres"
@@ -205,7 +204,7 @@ app:
   # Option 2: Hardcoded secrets (only used if existingSecret is empty)
   # secrets:
   #   KC_BOOTSTRAP_ADMIN_PASSWORD: "difficult-password"
-  #   KC_BOOTSTRAP_ADMIN_USERNAME: "admin@devopsgroup.sk"
+  #   KC_DB_PASSWORD: "another-difficult-password"
   secrets: {}
 
 openprime:
