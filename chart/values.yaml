@@ -258,6 +258,19 @@ openprime:
       from: ""
       fromDisplayName: OpenPrime
       replyTo: ""
+    # Sign in with Google, set up by the realm-setup Job. Needs an OAuth client
+    # (type Web application) with the redirect URI
+    # https://<KC_HOSTNAME>/realms/<realm>/broker/google/endpoint.
+    # Turning it off disables the provider but keeps users' links to Google.
+    # Keycloak calls Google's token endpoint itself: with networkPolicy
+    # enabled, its egress must allow DNS and HTTPS.
+    identityProviders:
+      google:
+        enabled: false
+        clientId: ""
+        # Never a value: read from app.existingSecret (or app.secrets) under
+        # this key, like the SMTP password.
+        clientSecretKey: GOOGLE_CLIENT_SECRET
 
 healthCheck:
   enabled: true
@@ -324,7 +337,7 @@ networkPolicy:
 # Realm configuration setup using keycloak-config-cli
 realmSetup:
   enabled: true
-  # Budget for the smtp-setup step to wait for Keycloak. Longer than the
+  # Budget for the realm-setup step to wait for Keycloak. Longer than the
   # config-cli availability check because a chart bump rolls the Deployment
   # while this Job is already running.
   keycloakWaitSeconds: 180

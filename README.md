@@ -46,6 +46,23 @@ See `chart/values.yaml` for all available configuration options.
 | `app.secrets` | Alternative: values the chart puts into its own Secret | `{}` |
 | `app.env.KC_BOOTSTRAP_ADMIN_USERNAME` | Bootstrap admin user | `admin` |
 | `updateStrategy` | `RollingUpdate`, or `Recreate` for a Keycloak minor upgrade | `RollingUpdate` |
+| `openprime.realm.identityProviders.google.enabled` | Sign in with Google, see below | `false` |
+| `openprime.realm.identityProviders.google.clientId` | Google OAuth client ID | `""` |
+| `openprime.realm.identityProviders.google.clientSecretKey` | Key in the Secret that holds the client secret | `GOOGLE_CLIENT_SECRET` |
+
+### Sign in with Google
+
+1. In Google Cloud, configure the OAuth consent screen (scopes `openid`, `email`, `profile`) and create an OAuth client of type **Web application** with the authorized redirect URI `https://<KC_HOSTNAME>/realms/openprime/broker/google/endpoint`. While the consent screen is in *Testing*, only its listed test users can sign in.
+2. Put the client secret into the chart's Secret under `GOOGLE_CLIENT_SECRET`: a key in `app.existingSecret` (for an External Secret, add the key to its `data`), or `app.secrets`.
+3. Set `openprime.realm.identityProviders.google.enabled: true` and `clientId`.
+
+The realm-setup Job creates or updates the provider on every deploy, so a rotated client secret takes effect on the next deploy. Setting `enabled: false` disables the provider but keeps it, so users keep their link to Google; it is never deleted.
+
+How it behaves:
+
+- Emails from Google are trusted (`trustEmail`), so a new Google user gets no verification mail. A user whose Google account has no family name is asked for one once, because the realm requires it.
+- If an account with the same email already exists, Keycloak's default first-login flow asks the user to confirm the link through a mail sent to that address. Known and accepted risk: someone who registered that address earlier without owning it, and knows the password they set, keeps access to the account the owner then links.
+- Keycloak exchanges the code with Google itself, so with `networkPolicy.enabled` its egress must allow DNS and HTTPS to the internet.
 
 ### Upgrading Keycloak
 

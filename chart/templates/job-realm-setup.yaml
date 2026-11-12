@@ -36,43 +36,7 @@ spec:
           env:
             - name: KEYCLOAK_URL
               value: "http://{{ include "openprime-keycloak.fullname" . }}:{{ .Values.service.port }}"
-            
-            {{- /* Admin Username Logic */ -}}
-            {{- if .Values.app.existingSecret }}
-            - name: KEYCLOAK_USER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.app.existingSecret }}
-                  key: KC_BOOTSTRAP_ADMIN_USERNAME
-            {{- else if and .Values.app.secrets .Values.app.secrets.KC_BOOTSTRAP_ADMIN_USERNAME }}
-            - name: KEYCLOAK_USER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "openprime-keycloak.fullname" . }}-secrets
-                  key: KC_BOOTSTRAP_ADMIN_USERNAME
-            {{- else }}
-            - name: KEYCLOAK_USER
-              value: {{ .Values.app.env.KC_BOOTSTRAP_ADMIN_USERNAME | quote }}
-            {{- end }}
-
-            {{- /* Admin Password Logic */ -}}
-            {{- if .Values.app.existingSecret }}
-            - name: KEYCLOAK_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.app.existingSecret }}
-                  key: KC_BOOTSTRAP_ADMIN_PASSWORD
-            {{- else if and .Values.app.secrets .Values.app.secrets.KC_BOOTSTRAP_ADMIN_PASSWORD }}
-            - name: KEYCLOAK_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "openprime-keycloak.fullname" . }}-secrets
-                  key: KC_BOOTSTRAP_ADMIN_PASSWORD
-            {{- else }}
-            - name: KEYCLOAK_PASSWORD
-              value: {{ .Values.app.env.KC_BOOTSTRAP_ADMIN_PASSWORD | quote }}
-            {{- end }}
-
+            {{- include "openprime-keycloak.realmSetupAdminEnv" . | nindent 12 }}
             - name: KEYCLOAK_AVAILABILITYCHECK_ENABLED
               value: "true"
             - name: KEYCLOAK_AVAILABILITYCHECK_TIMEOUT
@@ -94,7 +58,9 @@ spec:
           resources:
             {{- toYaml .Values.realmSetup.resources | nindent 12 }}
       containers:
-        - name: smtp-setup
+        # SMTP and identity providers: the realm settings that need a secret or
+        # a check, which is why they are not in the imported realm JSON.
+        - name: realm-setup
           # The Keycloak image already carries kcadm.sh and a JRE, so this needs
           # no extra image and installs nothing at run time.
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -108,23 +74,29 @@ spec:
               value: {{ .Values.openprime.realm.name | default "openprime" | quote }}
             - name: KEYCLOAK_WAIT_SECONDS
               value: {{ .Values.realmSetup.keycloakWaitSeconds | default 180 | quote }}
-            {{- if .Values.app.existingSecret }}
-            - name: KEYCLOAK_USER
+            {{- include "openprime-keycloak.realmSetupAdminEnv" . | nindent 12 }}
+{{- with .Values.openprime.realm.identityProviders.google }}
+{{- if .enabled }}
+{{- if not .clientId }}{{ fail "openprime.realm.identityProviders.google.enabled is true but clientId is empty" }}{{ end }}
+{{- if not .clientSecretKey }}{{ fail "openprime.realm.identityProviders.google.enabled is true but clientSecretKey is empty — the client secret comes from the Secret under that key" }}{{ end }}
+            - name: GOOGLE_ENABLED
+              value: "true"
+            - name: GOOGLE_CLIENT_ID
+              value: {{ .clientId | quote }}
+            - name: GOOGLE_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.app.existingSecret }}
-                  key: KC_BOOTSTRAP_ADMIN_USERNAME
-            - name: KEYCLOAK_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.app.existingSecret }}
-                  key: KC_BOOTSTRAP_ADMIN_PASSWORD
-            {{- else }}
-            - name: KEYCLOAK_USER
-              value: {{ .Values.app.env.KC_BOOTSTRAP_ADMIN_USERNAME | quote }}
-            - name: KEYCLOAK_PASSWORD
-              value: {{ .Values.app.env.KC_BOOTSTRAP_ADMIN_PASSWORD | quote }}
-            {{- end }}
+                  {{- if $.Values.app.existingSecret }}
+                  name: {{ $.Values.app.existingSecret }}
+                  {{- else }}
+                  name: {{ include "openprime-keycloak.fullname" $ }}-secrets
+                  {{- end }}
+                  key: {{ .clientSecretKey }}
+{{- else }}
+            - name: GOOGLE_ENABLED
+              value: "false"
+{{- end }}
+{{- end }}
 {{- with .Values.openprime.realm.smtp }}
 {{- if .enabled }}
 {{- if not .host }}{{ fail "openprime.realm.smtp.enabled is true but smtp.host is empty — that would advertise password reset with nowhere to send it" }}{{ end }}
@@ -169,11 +141,6 @@ spec:
             - /bin/bash
             - -ec
             - |
-              if [ "${SMTP_ENABLED}" != "true" ]; then
-                echo "smtp disabled - password reset stays off, nothing to do"
-                exit 0
-              fi
-
               KCADM=/opt/keycloak/bin/kcadm.sh
 
               # Wait for Keycloak the way config-cli does. This container starts
@@ -198,6 +165,11 @@ spec:
                 sleep 5
               done
 
+              if [ "${SMTP_ENABLED}" != "true" ]; then
+                echo "smtp disabled - password reset stays off"
+              else
+              # Not indented under the else on purpose: the JSON heredoc
+              # terminators must start the line.
               smtp_json() {
                 cat <<JSON
               {
@@ -235,6 +207,31 @@ spec:
               }
               JSON
               echo "password reset enabled"
+              fi
+
+              # Google sign-in. kcadm -s escapes each value, so a secret
+              # containing quotes cannot break the request the way a hand-built
+              # JSON body would.
+              IDP=identity-provider/instances/google
+              if [ "${GOOGLE_ENABLED}" = "true" ]; then
+                set -- -r "$REALM" \
+                  -s alias=google -s providerId=google -s enabled=true \
+                  -s trustEmail=true \
+                  -s "config.clientId=${GOOGLE_CLIENT_ID}" \
+                  -s "config.clientSecret=${GOOGLE_CLIENT_SECRET}" \
+                  -s config.syncMode=IMPORT
+                if "$KCADM" get "$IDP" -r "$REALM" > /dev/null 2>&1; then
+                  "$KCADM" update "$IDP" "$@"
+                else
+                  "$KCADM" create identity-provider/instances "$@"
+                fi
+                echo "google sign-in enabled"
+              elif "$KCADM" get "$IDP" -r "$REALM" > /dev/null 2>&1; then
+                # Disable, never delete: deleting the provider drops every
+                # user's link to their Google account.
+                "$KCADM" update "$IDP" -r "$REALM" -s enabled=false
+                echo "google sign-in disabled"
+              fi
           resources:
             {{- toYaml .Values.realmSetup.resources | nindent 12 }}
       volumes:
