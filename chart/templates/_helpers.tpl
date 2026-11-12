@@ -62,6 +62,46 @@ app.kubernetes.io/component: realm-setup
 {{- end }}
 
 {{/*
+Bootstrap-admin credentials for both realm-setup containers, from the same
+place the Keycloak pod gets them: existingSecret, else app.secrets, else
+app.env (devMode only, see the OP-270 guard in deployment.yaml).
+*/}}
+{{- define "openprime-keycloak.realmSetupAdminEnv" -}}
+{{- if .Values.app.existingSecret }}
+- name: KEYCLOAK_USER
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.app.existingSecret }}
+      key: KC_BOOTSTRAP_ADMIN_USERNAME
+{{- else if and .Values.app.secrets .Values.app.secrets.KC_BOOTSTRAP_ADMIN_USERNAME }}
+- name: KEYCLOAK_USER
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "openprime-keycloak.fullname" . }}-secrets
+      key: KC_BOOTSTRAP_ADMIN_USERNAME
+{{- else }}
+- name: KEYCLOAK_USER
+  value: {{ .Values.app.env.KC_BOOTSTRAP_ADMIN_USERNAME | quote }}
+{{- end }}
+{{- if .Values.app.existingSecret }}
+- name: KEYCLOAK_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.app.existingSecret }}
+      key: KC_BOOTSTRAP_ADMIN_PASSWORD
+{{- else if and .Values.app.secrets .Values.app.secrets.KC_BOOTSTRAP_ADMIN_PASSWORD }}
+- name: KEYCLOAK_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "openprime-keycloak.fullname" . }}-secrets
+      key: KC_BOOTSTRAP_ADMIN_PASSWORD
+{{- else }}
+- name: KEYCLOAK_PASSWORD
+  value: {{ .Values.app.env.KC_BOOTSTRAP_ADMIN_PASSWORD | quote }}
+{{- end }}
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "openprime-keycloak.serviceAccountName" -}}

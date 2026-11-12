@@ -46,6 +46,27 @@ jobs:
           fi
           grep -q "KC_DB_PASSWORD is required" err.txt
 
+      - name: Template chart (Google sign-in without a client ID must refuse to render)
+        run: |
+          if helm template ci chart -f chart/ci/test-values.yaml \
+              --set openprime.realm.identityProviders.google.enabled=true > /dev/null 2> err.txt; then
+            echo "::error::rendered Google sign-in without a client ID"
+            exit 1
+          fi
+          grep -q "google.enabled is true but clientId is empty" err.txt
+
+      # The script only runs inside a post-upgrade hook, so a syntax error would
+      # first show up as a failed production sync.
+      - name: Validate rendered realm-setup script parses
+        run: |
+          helm template ci chart -f chart/ci/test-values.yaml \
+            --set openprime.realm.identityProviders.google.enabled=true \
+            --set openprime.realm.identityProviders.google.clientId=ci \
+            --show-only templates/job-realm-setup.yaml \
+            | yq '.spec.template.spec.containers[0].command[2]' > realm-setup.sh
+          bash -n realm-setup.sh
+          grep -q "google sign-in enabled" realm-setup.sh
+
       - name: Validate rendered realm JSON parses
         run: |
           helm template ci chart -f chart/ci/test-values.yaml --show-only templates/configmap-realm.yaml \
