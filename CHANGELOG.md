@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.11.0](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.10.3...v0.11.0) (2026-11-12)
+
+### 🚀 Features
+
+* sign in with Google (OP-282) ([#35](https://github.com/devopsgroupeu/openprime-keycloak/issues/35)) ([d987364](https://github.com/devopsgroupeu/openprime-keycloak/commit/d987364c63f3aac5e7cda4538c3ef47a5b67f8e0))
+
 ## [0.10.3](https://github.com/devopsgroupeu/openprime-keycloak/compare/v0.10.2...v0.10.3) (2026-11-09)
 
 ### 🐛 Bug Fixes
