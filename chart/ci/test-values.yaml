@@ -4,3 +4,5 @@ app:
   secrets:
     KC_DB_PASSWORD: ci-db-password
     KC_BOOTSTRAP_ADMIN_PASSWORD: ci-admin-password
+podSecurityContext:
+  runAsUser: "abc"
