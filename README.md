@@ -87,6 +87,27 @@ npm start
 
 Keycloak will be available at http://localhost:8080
 
+## Supply chain
+
+Every release image published to `ghcr.io/devopsgroupeu/openprime-keycloak` carries:
+
+- a **keyless [cosign](https://github.com/sigstore/cosign) signature**, made by the release workflow with GitHub's OIDC identity (no long-lived signing key exists);
+- an **SBOM** (SPDX) and **build provenance**, attached to the image as attestations by BuildKit.
+
+The image is built `FROM` the upstream Keycloak image pinned by digest; Dependabot bumps tag and digest together. It runs as UID/GID `1000:1000`, and the OpenPrime theme is root-owned and read-only for that user.
+
+Before a release is cut, CI builds the image from the same commit (linux/amd64) and scans it, together with the repository, with Trivy. A fixable HIGH or CRITICAL vulnerability stops the release. Pull requests run the same scan. Findings that only upstream Keycloak can fix are listed in `.trivyignore`, each with a reason, a ticket and an expiry date.
+
+### Verify the signature
+
+Use cosign v3.1.4 or newer (the release workflow signs with v3.1.4):
+
+```bash
+cosign verify ghcr.io/devopsgroupeu/openprime-keycloak:<version> \
+  --certificate-identity "https://github.com/devopsgroupeu/openprime-keycloak/.github/workflows/reusable-docker-publish.yml@refs/heads/main" \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
+
 ## Related Repositories
 
 - [openprime-app](https://github.com/devopsgroupeu/openprime-app) - Frontend application

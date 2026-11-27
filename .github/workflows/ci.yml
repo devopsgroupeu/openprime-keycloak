@@ -19,20 +19,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Helm Lint
+  # helm lint --strict and kubeconform run in the "helm" job below, on every
+  # chart/ci/*-values.yaml. This job keeps the chart's own behaviour checks.
+  chart-checks:
+    name: Chart render checks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Helm
-        uses: azure/setup-helm@v5
+        uses: azure/setup-helm@2f5e7bc67f1f9972ab16657bb795f36d8f04de0e # v5.1.0
         with:
           version: "v3.12.0"
-
-      - name: Lint chart
-        run: helm lint chart -f chart/ci/test-values.yaml
 
       - name: Template chart (CI values must render)
         run: helm template ci chart -f chart/ci/test-values.yaml > /dev/null
@@ -73,6 +72,17 @@ jobs:
             | sed -n '/openprime-realm.json:/,$p' | sed '1d;s/^    //' \
             | python3 -c "import json,sys; json.load(sys.stdin); print('realm JSON valid')"
 
+  image-scan:
+    name: Image scan
+    permissions:
+      contents: read
+      security-events: write
+    uses: ./.github/workflows/reusable-image-scan.yml
+
+  helm:
+    name: Helm
+    uses: ./.github/workflows/reusable-helm-check.yml
+
   validate-pr-title:
     name: Validate PR Title
     runs-on: ubuntu-latest
@@ -81,7 +91,7 @@ jobs:
       pull-requests: read
     steps:
       - name: Validate PR title
-        uses: amannn/action-semantic-pull-request@v6
+        uses: amannn/action-semantic-pull-request@2252a14e810aa9b85c2d560bd7070c802206ecf6 # v6.1.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

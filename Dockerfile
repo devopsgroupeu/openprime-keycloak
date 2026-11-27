@@ -1,14 +1,14 @@
-FROM quay.io/keycloak/keycloak:26.8.2
+# Pinned by digest (H96). Dependabot's docker ecosystem bumps tag and digest
+# together. The digest is the multi-arch index, so amd64 and arm64 both resolve.
+FROM quay.io/keycloak/keycloak:26.8.2@sha256:7e66a96e4739239070aeaf72e4c5decf0f7f682cfc725b9f7ea2b336eaba38b3
 
-# Copy OpenPrime custom theme
-COPY theme /opt/keycloak/themes/
+# OpenPrime login theme. Root-owned and read-only for the runtime user, so a
+# compromised Keycloak process cannot rewrite the login pages it serves.
+COPY --chown=0:0 --chmod=755 theme /opt/keycloak/themes/
 
-# Set proper ownership and permissions
-USER root
-RUN chown -R keycloak:keycloak /opt/keycloak/themes/openprime && \
-    chmod -R 755 /opt/keycloak/themes/openprime
-
-USER 1000
+# Numeric UID:GID 1000:1000 (H97). The upstream image runs as 1000:0; with no
+# runAsGroup in the pod spec Kubernetes would inherit GID 0 from the image.
+USER 1000:1000
 
 # Run the augmentation now instead of on every container start. Measured on this
 # image: boot to "started" drops from ~30s to ~15s (3 runs each, no overlap).
