@@ -17,4 +17,3 @@
 # Keycloak triages it as not vulnerable (keycloak/keycloak#54855, label
 # status/not-vulnerable, backport/26.8 pending). Remove when Dependabot moves the
 # FROM line to a Keycloak release with Guava >= 33.7.2. OP-XXX
-CVE-2026-102554 exp:2027-02-28
