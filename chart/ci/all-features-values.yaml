@@ -1,0 +1,39 @@
+# CI only (helm lint + kubeconform): the test values plus every optional
+# template and branch switched on, so kubeconform validates all of them.
+# Passwords are placeholders; the chart refuses to render without them (OP-270).
+app:
+  secrets:
+    KC_DB_PASSWORD: ci-db-password
+    KC_BOOTSTRAP_ADMIN_PASSWORD: ci-admin-password
+    SMTP_PASSWORD: ci-smtp-password
+    GOOGLE_CLIENT_SECRET: ci-google-secret
+# Clustering: the chart refuses replicas >= 2 without the distributed cache.
+replicaCount: 2
+keycloak:
+  optimized: true
+  cache:
+    enabled: true
+autoscaling:
+  enabled: true
+ingress:
+  enabled: true
+  className: nginx
+  tls:
+    - secretName: ci-keycloak-tls
+      hosts:
+        - keycloak.openprime.local
+podDisruptionBudget:
+  enabled: true
+networkPolicy:
+  enabled: true
+openprime:
+  realm:
+    smtp:
+      enabled: true
+      host: smtp.example.invalid
+      from: no-reply@example.invalid
+      user: ci
+    identityProviders:
+      google:
+        enabled: true
+        clientId: ci-google-client-id
