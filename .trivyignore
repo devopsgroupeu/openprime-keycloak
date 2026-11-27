@@ -1,0 +1,20 @@
+# Trivy ignore file, read automatically by `trivy fs` and `trivy image`
+# (CI: .github/workflows/reusable-image-scan.yml).
+#
+# Prefer fixing: bump the Keycloak tag/digest in the Dockerfile. Ignore only
+# what the newest Keycloak patch release still ships.
+#
+# Every entry needs, directly above it, a comment with:
+#   - why it is acceptable (e.g. code path not reachable, fix not usable yet)
+#   - the ticket that tracks removing the entry
+# and an expiry date on the entry itself, so it is looked at again.
+#
+# No wildcards, no package-wide ignores, no entries without a CVE/GHSA id.
+
+# Guava 33.6.0-jre in /opt/keycloak/lib/lib/main, shipped by upstream Keycloak
+# 26.8.2 (the newest 26.x tag on 2026-11-23; no 26.8.3 or 26.9 yet). The flaw is
+# in Java deserialization of CompactHashMap/CompactHashSet/MapMakerInternalMap.
+# Keycloak triages it as not vulnerable (keycloak/keycloak#54855, label
+# status/not-vulnerable, backport/26.8 pending). Remove when Dependabot moves the
+# FROM line to a Keycloak release with Guava >= 33.7.2. OP-XXX
+CVE-2026-102554 exp:2027-02-28
